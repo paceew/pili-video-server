@@ -7,7 +7,7 @@ import (
 	"path/filepath"
 	"sync"
 
-	"github.com/pace/sample/scheduler/dbops"
+	"github.com/pili-video-server/scheduler/dbops"
 )
 
 func deleteVideo(vid string) error {

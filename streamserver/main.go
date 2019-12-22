@@ -4,7 +4,7 @@ import (
 	"net/http"
 
 	"github.com/julienschmidt/httprouter"
-	"github.com/pace/sample/streamserver/def"
+	"github.com/pili-video-server/streamserver/def"
 )
 
 type middleWareHandler struct {

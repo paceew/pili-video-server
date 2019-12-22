@@ -7,7 +7,7 @@ import (
 	"net/http"
 
 	"github.com/julienschmidt/httprouter"
-	"github.com/pace/sample/scheduler/dbops"
+	"github.com/pili-video-server/scheduler/dbops"
 )
 
 func AddDelection(w http.ResponseWriter, r *http.Request, p httprouter.Params) {

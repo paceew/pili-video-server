@@ -4,7 +4,7 @@ import (
 	"net/http"
 
 	"github.com/julienschmidt/httprouter"
-	"github.com/pace/sample/scheduler/taskrunner"
+	"github.com/pili-video-server/scheduler/taskrunner"
 )
 
 func RegistHandler() *httprouter.Router {

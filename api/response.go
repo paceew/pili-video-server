@@ -5,7 +5,7 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/pace/sample/api/def"
+	"github.com/pili-video-server/api/def"
 )
 
 func sendErrorResponse(w http.ResponseWriter, errResp def.ErrorResponse) {

@@ -8,10 +8,10 @@ import (
 	"net/http"
 
 	"github.com/julienschmidt/httprouter"
-	"github.com/pace/sample/api/dbops"
-	"github.com/pace/sample/api/def"
-	"github.com/pace/sample/api/session"
-	"github.com/pace/sample/api/utils"
+	"github.com/pili-video-server/api/dbops"
+	"github.com/pili-video-server/api/def"
+	"github.com/pili-video-server/api/session"
+	"github.com/pili-video-server/api/utils"
 )
 
 func CreateUser(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
@@ -75,10 +75,10 @@ func Login(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 
 func GetUserInfo(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 	//验证用户是否登陆
-	// if !ValidateLogin(w, r) {
-	// 	log.Printf("Unauthorized user\n")
-	// 	return
-	// }
+	if !ValidateLogin(w, r) {
+		log.Printf("Unauthorized user\n")
+		return
+	}
 
 	uname := p.ByName("user_name")
 	user, err := dbops.GetUser(uname)
@@ -110,10 +110,10 @@ func Logout(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 
 func ModifyPwd(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 	//验证用户
-	// if !ValidateUser(w, r, p) {
-	// 	log.Printf("Unauthorized user\n")
-	// 	return
-	// }
+	if !ValidateUser(w, r, p) {
+		log.Printf("Unauthorized user\n")
+		return
+	}
 
 	uname := p.ByName("user_name")
 	res, _ := ioutil.ReadAll(r.Body)
@@ -226,10 +226,10 @@ func GetVideo(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 
 func DeleteVideo(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 	//验证用户
-	// if !ValidateUser(w, r, p) {
-	// 	log.Printf("Unauthorized user\n")
-	// 	return
-	// }
+	if !ValidateUser(w, r, p) {
+		log.Printf("Unauthorized user\n")
+		return
+	}
 
 	vid := p.ByName("vid_id")
 	err := dbops.DeleteVideoInfo(vid)
@@ -247,10 +247,10 @@ func DeleteVideo(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 
 func AddNewVideo(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 	//验证用户是否登陆
-	// if !ValidateLogin(w, r) {
-	// 	log.Printf("Unauthorized user\n")
-	// 	return
-	// }
+	if !ValidateLogin(w, r) {
+		log.Printf("user not login\n")
+		return
+	}
 
 	video := &def.NewVideo{}
 	res, _ := ioutil.ReadAll(r.Body)
@@ -307,10 +307,10 @@ func ListComments(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 
 func AddNewComment(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 	//验证用户是否登陆
-	// if !ValidateLogin(w, r) {
-	// 	log.Printf("Unauthorized user\n")
-	// 	return
-	// }
+	if !ValidateLogin(w, r) {
+		log.Printf("user not longin\n")
+		return
+	}
 
 	vid := p.ByName("vid_id")
 	res, _ := ioutil.ReadAll(r.Body)
@@ -338,10 +338,10 @@ func AddNewComment(w http.ResponseWriter, r *http.Request, p httprouter.Params) 
 
 func DeleteComment(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 	//验证用户权限
-	// if !ValidateVideoAnthor(w, r, p) {
-	// 	log.Printf("Unauthorized user\n")
-	// 	return
-	// }
+	if !ValidateVideoAnthor(w, r, p) && !ValidateCommentAnthor(w, r, p) {
+		log.Printf("Unauthorized user\n")
+		return
+	}
 
 	cid := p.ByName("com_id")
 	err := dbops.DeleteComment(cid)

@@ -6,8 +6,8 @@ import (
 	"time"
 
 	_ "github.com/go-sql-driver/mysql"
-	"github.com/pace/sample/api/def"
-	"github.com/pace/sample/api/utils"
+	"github.com/pili-video-server/api/def"
+	"github.com/pili-video-server/api/utils"
 )
 
 func AddUser(userName string, pwd string) error {

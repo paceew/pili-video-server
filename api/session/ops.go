@@ -5,9 +5,9 @@ import (
 	"log"
 
 	"github.com/gomodule/redigo/redis"
-	"github.com/pace/sample/api/dbops"
-	"github.com/pace/sample/api/def"
-	"github.com/pace/sample/api/utils"
+	"github.com/pili-video-server/api/dbops"
+	"github.com/pili-video-server/api/def"
+	"github.com/pili-video-server/api/utils"
 )
 
 // var Pool redis.Pool

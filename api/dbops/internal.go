@@ -6,7 +6,7 @@ import (
 
 	"github.com/gomodule/redigo/redis"
 	_ "github.com/gomodule/redigo/redis"
-	"github.com/pace/sample/api/def"
+	"github.com/pili-video-server/api/def"
 )
 
 // func InserSession(sid string, ttl int64, username string) error {
@@ -99,6 +99,21 @@ func GetUserNameByVid(vid string) (string, error) {
 	}
 	var name string
 	err = stmtout.QueryRow(vid).Scan(&name)
+	if err != nil {
+		return "", err
+	}
+
+	defer stmtout.Close()
+	return name, err
+}
+
+func GetUserNameByCid(cid string) (string, error) {
+	stmtout, err := dbConn.Prepare("SELECT users.login_name From users, comments WHERE comments.author_id = users.id WHERE comments.id = ?")
+	if err != nil {
+		return "", err
+	}
+	var name string
+	err = stmtout.QueryRow(cid).Scan(&name)
 	if err != nil {
 		return "", err
 	}

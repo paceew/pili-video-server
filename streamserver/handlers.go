@@ -9,7 +9,7 @@ import (
 	"time"
 
 	"github.com/julienschmidt/httprouter"
-	"github.com/pace/sample/streamserver/def"
+	"github.com/pili-video-server/streamserver/def"
 )
 
 func testPageHandler(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
