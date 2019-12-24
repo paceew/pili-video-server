@@ -174,7 +174,7 @@ func ModifyUserInfo(w http.ResponseWriter, r *http.Request, p httprouter.Params)
 	io.WriteString(w, "modify user info!")
 }
 
-func ListAllVideos(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+func ListAllVideosByUser(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 	//验证用户是否登陆
 	// if !ValidateLogin(w, r) {
 	// 	log.Printf("Unauthorized user\n")
@@ -183,6 +183,25 @@ func ListAllVideos(w http.ResponseWriter, r *http.Request, p httprouter.Params) 
 
 	uname := p.ByName("user_name")
 	videoList, err := dbops.ListVideoInfo(uname, 0, utils.GetCurrentTimestampSec())
+	if err != nil {
+		log.Print("list video db error:%v!\n", err)
+		sendErrorResponse(w, def.ErrorDBError)
+		return
+	}
+
+	videos := &def.VideosList{Videos: videoList}
+	if resp, err := json.Marshal(videos); err != nil {
+		sendErrorResponse(w, def.ErrorInternalFaults)
+		return
+	} else {
+		sendNormalResponse(w, string(resp), 200)
+	}
+	//	io.WriteString(w, "List all videos of:"+uname)
+}
+
+func ListAllVideosByMod(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+	mod := p.ByName("modular")
+	videoList, err := dbops.ListVideoInfoMod(mod, 0, utils.GetCurrentTimestampSec())
 	if err != nil {
 		log.Print("list video db error!\n")
 		sendErrorResponse(w, def.ErrorDBError)
@@ -196,7 +215,6 @@ func ListAllVideos(w http.ResponseWriter, r *http.Request, p httprouter.Params) 
 	} else {
 		sendNormalResponse(w, string(resp), 200)
 	}
-	//	io.WriteString(w, "List all videos of:"+uname)
 }
 
 func GetVideo(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
@@ -284,6 +302,64 @@ func AddNewVideo(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 	}
 
 	//	io.WriteString(w, "Add a new video: "+vid)
+}
+
+func LikeVideo(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+	//验证是否登陆
+	if !ValidateLogin(w, r) {
+		log.Printf("user not longin\n")
+		return
+	}
+	vid := p.ByName("vid_id")
+	uname := r.Header.Get(HEADER_FIELD_USERNAME)
+	err := dbops.LikeVideo(vid, uname)
+	if err != nil {
+		log.Printf("redis error :%v", err)
+		sendErrorResponse(w, def.ErrorDBError)
+		return
+	}
+
+	sendNormalResponse(w, "", 204)
+
+}
+
+func LikeCount(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+	vid := p.ByName("vid_id")
+
+	count, err := dbops.LikeCount(vid)
+	if err != nil {
+		log.Printf("someting error :%v", err)
+		sendErrorResponse(w, def.ErrorDBError)
+		return
+	}
+
+	if res, err := json.Marshal(count); err != nil {
+		log.Printf("json marshal error :%v", err)
+		sendErrorResponse(w, def.ErrorInternalFaults)
+		return
+	} else {
+		sendNormalResponse(w, string(res), 204)
+		return
+	}
+
+}
+
+//已点赞返回1，未点赞返回0
+func IsLike(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+	vid := p.ByName("vid_id")
+	uname := r.Header.Get(HEADER_FIELD_USERNAME)
+
+	yes, err := dbops.IsLike(vid, uname)
+	if err != nil {
+		log.Printf("someting error :%v\n", err)
+		sendErrorResponse(w, def.ErrorDBError)
+		return
+	}
+	if yes {
+		sendNormalResponse(w, "1", 200)
+	} else {
+		sendNormalResponse(w, "0", 200)
+	}
 }
 
 func ListComments(w http.ResponseWriter, r *http.Request, p httprouter.Params) {

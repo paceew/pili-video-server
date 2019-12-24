@@ -6,12 +6,13 @@ import (
 	"time"
 
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/gomodule/redigo/redis"
 	"github.com/pili-video-server/api/def"
 	"github.com/pili-video-server/api/utils"
 )
 
 func AddUser(userName string, pwd string) error {
-	stmtIns, err := dbConn.Prepare("INSERT INTO users (login_name, pwd) VALUES (?, ?)")
+	stmtIns, err := dbConn.Prepare("INSERT INTO users (username, pwd) VALUES (?, ?)")
 	if err != nil {
 		log.Printf("%s", err)
 		return err
@@ -26,7 +27,7 @@ func AddUser(userName string, pwd string) error {
 }
 
 func GetUserCredential(userName string) (string, error) {
-	stmtOut, err := dbConn.Prepare("SELECT pwd FROM users WHERE login_name = ?")
+	stmtOut, err := dbConn.Prepare("SELECT pwd FROM users WHERE username = ?")
 	if err != nil {
 		log.Printf("%s", err)
 		return "", err
@@ -42,7 +43,7 @@ func GetUserCredential(userName string) (string, error) {
 }
 
 func GetUser(userName string) (*def.User, error) {
-	stmtOut, err := dbConn.Prepare("SELECT id, pwd FROM users WHERE login_name = ?")
+	stmtOut, err := dbConn.Prepare("SELECT id, pwd FROM users WHERE username = ?")
 	if err != nil {
 		log.Printf("%s", err)
 		return nil, err
@@ -64,7 +65,7 @@ func GetUser(userName string) (*def.User, error) {
 }
 
 func GetUserId(userName string) (int, error) {
-	stmtOut, err := dbConn.Prepare("SELECT id FROM users WHERE login_name = ?")
+	stmtOut, err := dbConn.Prepare("SELECT id FROM users WHERE username = ?")
 	if err != nil {
 		log.Printf("get user id db prepare error!\n")
 		return -1, err
@@ -87,7 +88,7 @@ func ModifyUserInfo(userName string) error {
 }
 
 func ModifyUserPwd(userName string, pwd string) error {
-	stmtIns, err := dbConn.Prepare("UPDATE users SET pwd = ? WHERE login_name = ?")
+	stmtIns, err := dbConn.Prepare("UPDATE users SET pwd = ? WHERE username = ?")
 	if err != nil {
 		log.Printf("%s", err)
 		return err
@@ -165,9 +166,9 @@ func GetVideoInfo(vid string) (*def.VideoInfo, error) {
 }
 
 func ListVideoInfo(uname string, from, to int) ([]*def.VideoInfo, error) {
-	stmtOut, err := dbConn.Prepare(`SELECT video_info.id, video_info.author_id, video_info.name, video_info.disply_ctime FROM video_info
+	stmtOut, err := dbConn.Prepare(`SELECT video_info.id, video_info.author_id, video_info.name, video_info.disply_ctime, video_info.modular FROM video_info
 		INNER JOIN users ON video_info.author_id = users.id
-		WHERE users.login_name=? AND video_info.create_time > FROM_UNIXTIME(?) AND video_info.create_time<=FROM_UNIXTIME(?)
+		WHERE users.username=? AND video_info.create_time > FROM_UNIXTIME(?) AND video_info.create_time<=FROM_UNIXTIME(?)
 		ORDER BY video_info.create_time DESC`)
 	if err != nil {
 		log.Printf("list db prepare error!\n")
@@ -184,16 +185,108 @@ func ListVideoInfo(uname string, from, to int) ([]*def.VideoInfo, error) {
 		var aid int
 		var vname string
 		var displayTime string
-		err := rows.Scan(&vid, &aid, &vname, &displayTime)
+		var modular string
+		err := rows.Scan(&vid, &aid, &vname, &displayTime, &modular)
 		if err != nil {
 			return nil, err
 		}
-		videoInfo := &def.VideoInfo{Id: vid, AuthorId: aid, Name: vname, DisplayCtime: displayTime}
+		videoInfo := &def.VideoInfo{Id: vid, AuthorId: aid, Name: vname, DisplayCtime: displayTime, Modular: modular}
 		res = append(res, videoInfo)
 	}
 
 	defer stmtOut.Close()
 	return res, nil
+}
+
+func ListVideoInfoMod(mod string, from, to int) ([]*def.VideoInfo, error) {
+	stmtOut, err := dbConn.Prepare(`SELECT video_info.id, video_info.author_id, video_info.name, video_info.disply_ctime, video_info.modular 
+		FROM video_info WHERE video_info.modular=? AND video_info.create_time > FROM_UNIXTIME(?) AND video_info.create_time<=FROM_UNIXTIME(?)
+		ORDER BY video_info.create_time DESC`)
+	if err != nil {
+		log.Printf("list db prepare error!\n")
+		return nil, err
+	}
+
+	var res []*def.VideoInfo
+	rows, err := stmtOut.Query(mod, from, to)
+	if err != nil {
+		return nil, err
+	}
+	for rows.Next() {
+		var vid string
+		var aid int
+		var vname string
+		var displayTime string
+		var modular string
+		err := rows.Scan(&vid, &aid, &vname, &displayTime, &modular)
+		if err != nil {
+			return nil, err
+		}
+		videoInfo := &def.VideoInfo{Id: vid, AuthorId: aid, Name: vname, DisplayCtime: displayTime, Modular: modular}
+		res = append(res, videoInfo)
+	}
+
+	defer stmtOut.Close()
+	return res, nil
+}
+
+//点赞与取消点赞
+func LikeVideo(vid string, uname string) error {
+	conn := Pool.Get()
+	if conn == nil {
+		log.Printf("redis error!\n")
+	}
+	defer conn.Close()
+
+	// ustr := string(uid)
+	likestr := "like_" + vid
+	yes, _ := redis.Bool(conn.Do("sismember", likestr, uname))
+	// log.Printf("user:%v the video:%v is like?:%v\n", uname, likestr, yes)
+	if !yes {
+		_, err = conn.Do("sadd", likestr, uname)
+		if err != nil {
+			return err
+		}
+	} else {
+		_, err = conn.Do("srem", likestr, uname)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+//获取点赞数
+func LikeCount(vid string) (int, error) {
+	conn := Pool.Get()
+	if conn == nil {
+		log.Printf("redis conn error!\n")
+	}
+	defer conn.Close()
+
+	likestr := "like_" + vid
+	res, err := redis.Int(conn.Do("scard", likestr))
+	if err != nil {
+		return 0, err
+	}
+
+	return res, nil
+
+}
+
+//判断用户是否点赞
+func IsLike(vid string, uname string) (bool, error) {
+	conn := Pool.Get()
+	if conn == nil {
+		log.Printf("redis conn error!\n")
+	}
+	defer conn.Close()
+
+	likestr := "like_" + vid
+	yes, _ := redis.Bool(conn.Do("sismember", likestr, uname))
+
+	return yes, nil
 }
 
 func AddNewComment(aid int, vid, content string) error {
@@ -215,11 +308,11 @@ func AddNewComment(aid int, vid, content string) error {
 
 func ListComments(vid string, from, to int) ([]*def.CommentInfo, error) {
 	var res []*def.CommentInfo
-	stmtOut, err := dbConn.Prepare(`SELECT comments.id, video_info.name , users.login_name, comment 
+	stmtOut, err := dbConn.Prepare(`SELECT comments.id, video_info.name , users.username, comment 
 	FROM comments,video_info,users WHERE users.id=video_info.author_id 
 	AND comments.video_id=video_info.id AND video_info.id = ? 
-	AND comments.time > FROM_UNIXTIME(?) AND comments.time<=FROM_UNIXTIME(?) 
-	ORDER BY comments.time DESC`)
+	AND comments.create_time > FROM_UNIXTIME(?) AND comments.create_time<=FROM_UNIXTIME(?) 
+	ORDER BY comments.create_time DESC`)
 	if err != nil {
 		log.Printf("list comments db prepare error!\n")
 		return nil, err

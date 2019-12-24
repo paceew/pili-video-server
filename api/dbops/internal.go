@@ -5,7 +5,6 @@ import (
 	"log"
 
 	"github.com/gomodule/redigo/redis"
-	_ "github.com/gomodule/redigo/redis"
 	"github.com/pili-video-server/api/def"
 )
 
@@ -93,7 +92,7 @@ import (
 // }
 
 func GetUserNameByVid(vid string) (string, error) {
-	stmtout, err := dbConn.Prepare("SELECT users.login_name From users, video_info WHERE video_info.author_id = users.id WHERE video_info.id = ?")
+	stmtout, err := dbConn.Prepare("SELECT users.username From users, video_info WHERE video_info.author_id = users.id WHERE video_info.id = ?")
 	if err != nil {
 		return "", err
 	}
@@ -108,7 +107,7 @@ func GetUserNameByVid(vid string) (string, error) {
 }
 
 func GetUserNameByCid(cid string) (string, error) {
-	stmtout, err := dbConn.Prepare("SELECT users.login_name From users, comments WHERE comments.author_id = users.id WHERE comments.id = ?")
+	stmtout, err := dbConn.Prepare("SELECT users.username From users, comments WHERE comments.author_id = users.id WHERE comments.id = ?")
 	if err != nil {
 		return "", err
 	}
@@ -152,10 +151,10 @@ func LoadMessageFromDB(uname string) {
 func loadMessage(uname string) {
 	//具体消息写入redis
 	uid, _ := GetUserId(uname)
-	stmtout1, err := dbConn.Prepare(`SELECT login_name,is_sender,message_content,send_time,status FROM private_messages,users
+	stmtout1, err := dbConn.Prepare(`SELECT username,is_sender,message_content,send_time,status FROM private_messages,users
 	 WHERE friend_id = users.id AND user_id = ? AND status != 3 ORDER BY friend_id asc,send_time desc`)
 	if err != nil {
-		log.Printf("load message db prepare error:%V!\n", err)
+		log.Printf("load message db prepare error:%v!\n", err)
 		return
 	}
 	defer stmtout1.Close()
@@ -195,10 +194,10 @@ func loadMessage(uname string) {
 	}
 
 	//从db读取消息列表
-	stmtout2, err := dbConn.Prepare(`SELECT login_name FROM (SELECT * FROM private_messages ORDER BY id DESC)p,users 
-	WHERE friend_id = users.id AND user_id = ? AND status != 3 GROUP BY p.user_id,login_name`)
+	stmtout2, err := dbConn.Prepare(`SELECT username FROM (SELECT * FROM private_messages ORDER BY id DESC)p,users 
+	WHERE friend_id = users.id AND user_id = ? AND status != 3 GROUP BY p.user_id,username`)
 	if err != nil {
-		log.Printf("load message db prepare error:%V!\n", err)
+		log.Printf("load message db prepare error:%v!\n", err)
 		return
 	}
 	defer stmtout2.Close()

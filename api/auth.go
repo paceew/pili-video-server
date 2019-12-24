@@ -18,11 +18,14 @@ func validateUserSession(r *http.Request) bool {
 	log.Printf("validating User Session ...\n")
 	sid := r.Header.Get(HEADER_FIELD_SESSION)
 	if len(sid) == 0 {
+		uname := r.Header.Get(HEADER_FIELD_USERNAME)
+		log.Printf("X-Session-Id : %v,X-User-Name :%v", sid, uname)
 		return false
 	}
 
 	uname, ok := session.IsSessionExpired(sid)
 	if ok {
+		log.Printf("session expired!")
 		r.Header.Add(HEADER_FIELD_USERNAME, "")
 		return false
 	}

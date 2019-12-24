@@ -58,7 +58,7 @@ func GenerateNewSessionId(username string) string {
 		log.Printf("marshal session error:%v!\n", err)
 	}
 
-	_, err = conn.Do("SET", session.Id, value, "EX", 60)
+	_, err = conn.Do("SET", session.Id, value, "EX", 86400)
 	if err != nil {
 		log.Printf("someting error:%v!\n", err)
 	}
@@ -118,7 +118,7 @@ func ReSetSession(sid string, username string) {
 		log.Printf("marshal session error:%v!\n", err)
 	}
 
-	_, err = conn.Do("SET", session.Id, value, "EX", 60)
+	_, err = conn.Do("SET", session.Id, value, "EX", 86400)
 	if err != nil {
 		log.Printf("someting error:%v!\n", err)
 	}

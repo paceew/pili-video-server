@@ -70,6 +70,7 @@ type VideoInfo struct {
 	Name         string `json:"video_name"`
 	AuthorId     int    `json:"video_aid"`
 	DisplayCtime string `json:"video_ct"`
+	Modular      string `json:"video_mod"`
 }
 
 type CommentInfo struct {
