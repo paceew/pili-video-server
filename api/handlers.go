@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"strconv"
 
 	"github.com/julienschmidt/httprouter"
 	"github.com/pili-video-server/api/dbops"
@@ -180,9 +181,16 @@ func ListAllVideosByUser(w http.ResponseWriter, r *http.Request, p httprouter.Pa
 	// 	log.Printf("Unauthorized user\n")
 	// 	return
 	// }
+	fromstr := p.ByName("page")
+	fromint, err := strconv.Atoi(fromstr)
+	if err != nil {
+		log.Print("fromstr error:%v!\n", err)
+		sendErrorResponse(w, def.ErrorRequestBodyPaseFailed)
+		return
+	}
 
 	uname := p.ByName("user_name")
-	videoList, err := dbops.ListVideoInfo(uname, 0, utils.GetCurrentTimestampSec())
+	videoList, err := dbops.ListVideoInfo(uname, fromint, def.PAGE_NUM)
 	if err != nil {
 		log.Print("list video db error:%v!\n", err)
 		sendErrorResponse(w, def.ErrorDBError)
@@ -200,8 +208,16 @@ func ListAllVideosByUser(w http.ResponseWriter, r *http.Request, p httprouter.Pa
 }
 
 func ListAllVideosByMod(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+	fromstr := p.ByName("page")
+	fromint, err := strconv.Atoi(fromstr)
+	if err != nil {
+		log.Print("fromstr error:%v!\n", err)
+		sendErrorResponse(w, def.ErrorRequestBodyPaseFailed)
+		return
+	}
+
 	mod := p.ByName("modular")
-	videoList, err := dbops.ListVideoInfoMod(mod, 0, utils.GetCurrentTimestampSec())
+	videoList, err := dbops.ListVideoInfoMod(mod, fromint, def.PAGE_NUM)
 	if err != nil {
 		log.Print("list video db error!\n")
 		sendErrorResponse(w, def.ErrorDBError)
@@ -363,9 +379,16 @@ func IsLike(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 }
 
 func ListComments(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+	fromstr := p.ByName("page")
+	fromint, err := strconv.Atoi(fromstr)
+	if err != nil {
+		log.Print("fromstr error:%v!\n", err)
+		sendErrorResponse(w, def.ErrorRequestBodyPaseFailed)
+		return
+	}
 	vid := p.ByName("vid_id")
 
-	commentInfo, err := dbops.ListComments(vid, 0, utils.GetCurrentTimestampSec())
+	commentInfo, err := dbops.ListComments(vid, fromint, def.PAGE_NUM)
 	if err != nil {
 		log.Printf("list comment db error!\n")
 		sendErrorResponse(w, def.ErrorDBError)

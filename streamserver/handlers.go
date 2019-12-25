@@ -13,7 +13,7 @@ import (
 )
 
 func testPageHandler(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
-	t, err := template.ParseFiles("/home/pace/go/src/github.com/pace/sample/streamserver/upload.html")
+	t, err := template.ParseFiles("./streamserver/upload.html")
 	if err != nil {
 		log.Printf("parse files error:%v!\n", err)
 		return
@@ -45,6 +45,7 @@ func uploadHandler(w http.ResponseWriter, r *http.Request, p httprouter.Params) 
 		return
 	}
 
+	//上传视频
 	file, _, err := r.FormFile("file")
 	if err != nil {
 		log.Printf("file error :%v\n", err)
@@ -68,6 +69,44 @@ func uploadHandler(w http.ResponseWriter, r *http.Request, p httprouter.Params) 
 		return
 	}
 
+	//上传封面
+	icon, _, err := r.FormFile("icon")
+	if err != nil {
+		log.Printf("icon error :%v\n", err)
+		sendErrorResponse(w, def.ErrorInternalFaults)
+		return
+	}
+
+	dataIc, err := ioutil.ReadAll(icon)
+	if err != nil {
+		log.Printf("dataIc error :%v\n", err)
+		sendErrorResponse(w, def.ErrorInternalFaults)
+		return
+	}
+
+	err = ioutil.WriteFile(def.ICON_DIR+vid, dataIc, 0666)
+	if err != nil {
+		log.Printf("io write error : %v\n", err)
+		sendErrorResponse(w, def.ErrorInternalFaults)
+		return
+	}
+
 	//	utils.Proxy(w, r)                     上传转发
 	sendNormalResponse(w, "upload ok !", 201)
+}
+
+func GetIcon(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+	vid := p.ByName("vid_id")
+	il := def.ICON_DIR + vid
+	icon, err := os.Open(il)
+	if err != nil {
+		log.Printf("open icon error:%v!\n", err)
+		sendErrorResponse(w, def.ErrorInternalFaults)
+		return
+	}
+
+	w.Header().Set("Conten-Type", "image/png")
+	http.ServeContent(w, r, "", time.Now(), icon)
+
+	defer icon.Close()
 }

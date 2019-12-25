@@ -165,18 +165,17 @@ func GetVideoInfo(vid string) (*def.VideoInfo, error) {
 	return res, nil
 }
 
-func ListVideoInfo(uname string, from, to int) ([]*def.VideoInfo, error) {
-	stmtOut, err := dbConn.Prepare(`SELECT video_info.id, video_info.author_id, video_info.name, video_info.disply_ctime, video_info.modular FROM video_info
-		INNER JOIN users ON video_info.author_id = users.id
-		WHERE users.username=? AND video_info.create_time > FROM_UNIXTIME(?) AND video_info.create_time<=FROM_UNIXTIME(?)
-		ORDER BY video_info.create_time DESC`)
+func ListVideoInfo(uname string, from, n int) ([]*def.VideoInfo, error) {
+	stmtOut, err := dbConn.Prepare(`SELECT video_info.id, video_info.author_id, video_info.name, video_info.disply_ctime, modulars.name FROM video_info,modulars,users
+	WHERE users.username=(?) AND video_info.modular = modulars.id AND users.id = video_info.author_id
+	ORDER BY video_info.create_time DESC LIMIT (?),(?)`)
 	if err != nil {
 		log.Printf("list db prepare error!\n")
 		return nil, err
 	}
 
 	var res []*def.VideoInfo
-	rows, err := stmtOut.Query(uname, from, to)
+	rows, err := stmtOut.Query(uname, from, n)
 	if err != nil {
 		return nil, err
 	}
@@ -198,17 +197,17 @@ func ListVideoInfo(uname string, from, to int) ([]*def.VideoInfo, error) {
 	return res, nil
 }
 
-func ListVideoInfoMod(mod string, from, to int) ([]*def.VideoInfo, error) {
-	stmtOut, err := dbConn.Prepare(`SELECT video_info.id, video_info.author_id, video_info.name, video_info.disply_ctime, video_info.modular 
-		FROM video_info WHERE video_info.modular=? AND video_info.create_time > FROM_UNIXTIME(?) AND video_info.create_time<=FROM_UNIXTIME(?)
-		ORDER BY video_info.create_time DESC`)
+func ListVideoInfoMod(mod string, from, n int) ([]*def.VideoInfo, error) {
+	stmtOut, err := dbConn.Prepare(`SELECT video_info.id, video_info.author_id, video_info.name, video_info.disply_ctime, modulars.name 
+	FROM video_info,modulars WHERE modulars.name=?
+	ORDER BY video_info.create_time DESC LIMIT ?,?`)
 	if err != nil {
 		log.Printf("list db prepare error!\n")
 		return nil, err
 	}
 
 	var res []*def.VideoInfo
-	rows, err := stmtOut.Query(mod, from, to)
+	rows, err := stmtOut.Query(mod, from, n)
 	if err != nil {
 		return nil, err
 	}
@@ -306,19 +305,18 @@ func AddNewComment(aid int, vid, content string) error {
 	return nil
 }
 
-func ListComments(vid string, from, to int) ([]*def.CommentInfo, error) {
+func ListComments(vid string, from, n int) ([]*def.CommentInfo, error) {
 	var res []*def.CommentInfo
 	stmtOut, err := dbConn.Prepare(`SELECT comments.id, video_info.name , users.username, comment 
 	FROM comments,video_info,users WHERE users.id=video_info.author_id 
-	AND comments.video_id=video_info.id AND video_info.id = ? 
-	AND comments.create_time > FROM_UNIXTIME(?) AND comments.create_time<=FROM_UNIXTIME(?) 
-	ORDER BY comments.create_time DESC`)
+	AND comments.video_id=video_info.id AND video_info.id = ?  
+	ORDER BY comments.create_time DESC LIMIT ?,?`)
 	if err != nil {
 		log.Printf("list comments db prepare error!\n")
 		return nil, err
 	}
 
-	rows, err := stmtOut.Query(vid, from, to)
+	rows, err := stmtOut.Query(vid, from, n)
 	if err != nil {
 		return nil, err
 	}

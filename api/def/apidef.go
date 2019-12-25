@@ -2,6 +2,7 @@ package def
 
 const (
 	SCHEDULER_ADDR = "localhost:9001/"
+	PAGE_NUM       = 10
 )
 
 //request

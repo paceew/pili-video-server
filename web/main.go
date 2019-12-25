@@ -21,6 +21,7 @@ func RegistHandler() *httprouter.Router {
 	//proxy 转发
 	router.POST("/video/:vid_id", proxyHandler)
 	router.GET("/video/:vid_id", proxyHandler)
+	router.GET("/icon/:vid_id", proxyHandler)
 
 	router.ServeFiles("/statics/*filepath", http.Dir("./template"))
 
