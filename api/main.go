@@ -21,6 +21,8 @@ func (m middleWareHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	//check session
 	log.Printf("middleWareHandlerOne!\n")
 	validateUserSession(r)
+	//允许访问所有域
+	w.Header().Set("Access-Control-Allow-Origin", "*")
 	m.r.ServeHTTP(w, r)
 }
 

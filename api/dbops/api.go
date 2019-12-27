@@ -101,7 +101,7 @@ func ModifyUserPwd(userName string, pwd string) error {
 	return nil
 }
 
-func AddNewVideo(aid int, vname string, mid int) (*def.VideoInfo, error) {
+func AddNewVideo(aid int, vname string, mid int, itd string) (*def.VideoInfo, error) {
 	vid, _ := utils.NewUUID()
 
 	t := time.Now()
@@ -119,10 +119,28 @@ func AddNewVideo(aid int, vname string, mid int) (*def.VideoInfo, error) {
 		return nil, err
 	}
 
+	_ = AddIntroduction(vid, itd)
+
 	vInfo := &def.VideoInfo{Id: vid, AuthorId: aid, Name: vname, DisplayCtime: ctime}
 
 	defer stmtIns.Close()
 	return vInfo, nil
+}
+
+func AddIntroduction(vid string, content string) error {
+	stmtIns, err := dbConn.Prepare("INSERT INTO introduction VALUES (?,?)")
+	if err != nil {
+		log.Printf("insert db prepare error\n")
+		return err
+	}
+
+	_, err = stmtIns.Exec(vid, content)
+	if err != nil {
+		return err
+	}
+
+	defer stmtIns.Close()
+	return nil
 }
 
 func DeleteVideoInfo(vid string) error {
@@ -142,7 +160,7 @@ func DeleteVideoInfo(vid string) error {
 }
 
 //根据vid获取简介
-func GetIntrodution(vid string) (string, error) {
+func GetIntroduction(vid string) (string, error) {
 	stmtOut, err := dbConn.Prepare("SELECT content FROM introduction WHERE vid = ?")
 	if err != nil {
 		log.Printf("get db prepare error!\n")

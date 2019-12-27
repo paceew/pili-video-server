@@ -19,9 +19,12 @@ func (m middleWareHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	//允许访问所有域
+	w.Header().Set("Access-Control-Allow-Origin", "*")
 	m.r.ServeHTTP(w, r)
 	//releaseConnect
 	defer m.cl.ReleaseConn()
+
 }
 
 func NewMiddleWareHandler(r *httprouter.Router, cc int) http.Handler {

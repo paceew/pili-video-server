@@ -287,7 +287,7 @@ func GetVideo(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 //获取视频简介
 func GetIntroduction(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 	vid := p.ByName("vid_id")
-	res, err := dbops.GetIntrodution(vid)
+	res, err := dbops.GetIntroduction(vid)
 	if err != nil {
 		log.Printf("get video info db error!\n")
 		sendErrorResponse(w, def.ErrorDBError)
@@ -355,7 +355,7 @@ func AddNewVideo(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 	}
 
 	vInfo := &def.VideoInfo{}
-	vInfo, err = dbops.AddNewVideo(aid, video.VideoName, mid)
+	vInfo, err = dbops.AddNewVideo(aid, video.VideoName, mid, video.Introdution)
 	if err != nil {
 		log.Printf("aid : %v add new video error:%v\n", aid, err)
 		sendErrorResponse(w, def.ErrorDBError)
