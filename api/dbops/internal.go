@@ -121,6 +121,20 @@ func GetUserNameByCid(cid string) (string, error) {
 	return name, err
 }
 
+func GetModIdByName(modName string) (int, error) {
+	stmtOut, err := dbConn.Prepare("SELECT id FROM modulars WHERE name = ?")
+	if err != nil {
+		return 0, err
+	}
+	var id int
+	err = stmtOut.QueryRow(modName).Scan(&id)
+	if err != nil {
+		return 0, err
+	}
+	defer stmtOut.Close()
+	return id, err
+}
+
 func LoadMessageFromDB(uname string) {
 	uid, _ := GetUserId(uname)
 	stmtout, err := dbConn.Prepare("SELECT count(user_id) FROM private_messages WHERE user_id = ? AND status = 1 GROUP BY user_id ")

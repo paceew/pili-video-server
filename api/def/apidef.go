@@ -21,8 +21,10 @@ type UserModifyInfo struct {
 }
 
 type NewVideo struct {
-	AuthorName string `json:"author_name"`
-	VideoName  string `json:"video_name"`
+	AuthorName  string `json:"author_name"`
+	VideoName   string `json:"video_name"`
+	Modular     string `json:"video_mod"`
+	Introdution string `json:"video_itd"`
 }
 
 type NewComment struct {
@@ -60,6 +62,10 @@ type LikeNumber struct {
 
 type LikeStatus struct {
 	Like bool `json:"like"`
+}
+
+type Introduction struct {
+	Content string `json:"itd"`
 }
 
 //Data model

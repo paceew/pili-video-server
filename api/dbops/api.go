@@ -101,20 +101,20 @@ func ModifyUserPwd(userName string, pwd string) error {
 	return nil
 }
 
-func AddNewVideo(aid int, vname string) (*def.VideoInfo, error) {
+func AddNewVideo(aid int, vname string, mid int) (*def.VideoInfo, error) {
 	vid, _ := utils.NewUUID()
 
 	t := time.Now()
 	ctime := t.Format("Jan 02 2006, 15:04:05")
 
 	stmtIns, err := dbConn.Prepare(`INSERT INTO video_info
-	(id, author_id, name, disply_ctime) VALUES(?, ?, ?, ?)`)
+	(id, author_id, name, modular) VALUES(?, ?, ?, ?)`)
 	if err != nil {
 		log.Printf("insert db prepare error\n")
 		return nil, err
 	}
 
-	_, err = stmtIns.Exec(vid, aid, vname, ctime)
+	_, err = stmtIns.Exec(vid, aid, vname, mid)
 	if err != nil {
 		return nil, err
 	}
@@ -139,6 +139,27 @@ func DeleteVideoInfo(vid string) error {
 
 	defer stmtDel.Close()
 	return nil
+}
+
+//根据vid获取简介
+func GetIntrodution(vid string) (string, error) {
+	stmtOut, err := dbConn.Prepare("SELECT content FROM introduction WHERE vid = ?")
+	if err != nil {
+		log.Printf("get db prepare error!\n")
+		return "", err
+	}
+
+	var content string
+	err = stmtOut.QueryRow(vid).Scan(&content)
+	if err != nil && err != sql.ErrNoRows {
+		return "", err
+	}
+	if err == sql.ErrNoRows {
+		return "", nil
+	}
+
+	defer stmtOut.Close()
+	return content, nil
 }
 
 func GetVideoInfo(vid string) (*def.VideoInfo, error) {
