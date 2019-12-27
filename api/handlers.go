@@ -284,6 +284,25 @@ func GetVideo(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 
 }
 
+//获取视频简介
+func GetIntroduction(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+	vid := p.ByName("vid_id")
+	res, err := dbops.GetIntrodution(vid)
+	if err != nil {
+		log.Printf("get video info db error!\n")
+		sendErrorResponse(w, def.ErrorDBError)
+		return
+	}
+
+	itd := &def.Introduction{Content: res}
+	if resp, err := json.Marshal(itd); err != nil {
+		sendErrorResponse(w, def.ErrorInternalFaults)
+		return
+	} else {
+		sendNormalResponse(w, string(resp), 200)
+	}
+}
+
 func DeleteVideo(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 	//验证用户
 	if !ValidateUser(w, r, p) {
@@ -328,8 +347,15 @@ func AddNewVideo(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 		return
 	}
 
+	mid, err := dbops.GetModIdByName(video.Modular)
+	if err != nil {
+		log.Printf("mid : %v get modular id error : %v\n", aid, err)
+		sendErrorResponse(w, def.ErrorDBError)
+		return
+	}
+
 	vInfo := &def.VideoInfo{}
-	vInfo, err = dbops.AddNewVideo(aid, video.VideoName)
+	vInfo, err = dbops.AddNewVideo(aid, video.VideoName, mid)
 	if err != nil {
 		log.Printf("aid : %v add new video error:%v\n", aid, err)
 		sendErrorResponse(w, def.ErrorDBError)
