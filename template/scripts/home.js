@@ -490,7 +490,7 @@ function createVideo(vname, callback) {
     };
 
     var dat = {
-        'url': 'http://' + window.location.hostname + ':8000/user/' + uname + '/videos',
+        'url': 'http://' + window.location.hostname + ':8000/user/' + uname + '/video',
         'method': 'POST',
         'req_body': JSON.stringify(reqBody)
     };
@@ -522,7 +522,7 @@ function createVideo(vname, callback) {
 
 function listAllVideos(callback) {
     var dat = {
-        'url': 'http://' + window.location.hostname + ':8000/user/' + uname + '/videos',
+        'url': 'http://' + window.location.hostname + ':8000/user/' + uname + '/videos/0',
         'method': 'GET',
         'req_body': ''
     };
@@ -555,7 +555,7 @@ function listAllVideos(callback) {
 
 function deleteVideo(vid, callback) {
     var dat = {
-        'url': 'http://' + window.location.hostname + ':8000/user/' + uname + '/videos/' + vid,
+        'url': 'http://' + window.location.hostname + ':8000/user/' + uname + '/video/' + vid,
         'method': 'DELETE',
         'req_body': ''
     };

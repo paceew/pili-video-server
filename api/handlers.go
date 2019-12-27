@@ -366,6 +366,7 @@ func LikeVideo(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 }
 
 func LikeCount(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+
 	vid := p.ByName("vid_id")
 
 	count, err := dbops.LikeCount(vid)
@@ -374,13 +375,14 @@ func LikeCount(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 		sendErrorResponse(w, def.ErrorDBError)
 		return
 	}
+	likeNum := &def.LikeNumber{Count: count}
 
-	if res, err := json.Marshal(count); err != nil {
+	if res, err := json.Marshal(likeNum); err != nil {
 		log.Printf("json marshal error :%v", err)
 		sendErrorResponse(w, def.ErrorInternalFaults)
 		return
 	} else {
-		sendNormalResponse(w, string(res), 204)
+		sendNormalResponse(w, string(res), 200)
 		return
 	}
 
@@ -397,10 +399,15 @@ func IsLike(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 		sendErrorResponse(w, def.ErrorDBError)
 		return
 	}
-	if yes {
-		sendNormalResponse(w, "1", 200)
+
+	like := &def.LikeStatus{Like: yes}
+	if res, err := json.Marshal(like); err != nil {
+		log.Printf("json marshal error :%v", err)
+		sendErrorResponse(w, def.ErrorInternalFaults)
+		return
 	} else {
-		sendNormalResponse(w, "0", 200)
+		sendNormalResponse(w, string(res), 200)
+		return
 	}
 }
 

@@ -13,9 +13,9 @@ func clearTables() {
 }
 
 func TestMain(m *testing.M) {
-	clearTables()
+	// clearTables()
 	m.Run()
-	clearTables()
+	// clearTables()
 }
 
 //test like funtion
@@ -167,7 +167,7 @@ func testGetVideoInfo(t *testing.T) {
 }
 
 func testListVideoInfo(t *testing.T) {
-	_, err := ListVideoInfo("pace-wang", 0, 100)
+	_, err := ListVideoInfo("test", 0, 100)
 	if err != nil {
 		t.Errorf("list videoinfo error:%v\n", err)
 	}

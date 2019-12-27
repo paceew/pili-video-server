@@ -37,8 +37,8 @@ func RegisterHandlers() *httprouter.Router {
 
 	//videos handler
 	router.GET("/user/:user_name/videos/:page", ListAllVideosByUser)
-	router.DELETE("/user/:user_name/videos/:vid_id", DeleteVideo)
-	router.POST("/user/:user_name/videos", AddNewVideo)
+	router.DELETE("/user/:user_name/video/:vid_id", DeleteVideo)
+	router.POST("/user/:user_name/video", AddNewVideo)
 	router.GET("/user/:user_name/video/:vid_id", GetVideo)
 	router.GET("/video/:modular/tim/:page", ListAllVideosByModTim)
 	router.GET("/video/:modular/hot/:page", ListAllVideosByModHot)

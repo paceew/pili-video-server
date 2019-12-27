@@ -142,17 +142,16 @@ func DeleteVideoInfo(vid string) error {
 }
 
 func GetVideoInfo(vid string) (*def.VideoInfo, error) {
-	stmtOut, err := dbConn.Prepare("SELECT id, name, author_id, disply_ctime FROM video_info WHERE id = ?")
+	stmtOut, err := dbConn.Prepare(`SELECT video_info.id, video_info.name, author_id, disply_ctime, modulars.name, like_number, collect_number, comment_number  
+	 FROM video_info, modulars  WHERE video_info.id = ? AND video_info.modular = modulars.id`)
 	if err != nil {
 		log.Printf("get db prepare error!\n")
 		return nil, err
 	}
 
-	var id string
-	var name string
-	var authorId int
-	var displayCTime string
-	err = stmtOut.QueryRow(vid).Scan(&id, &name, &authorId, &displayCTime)
+	var id, name, displayCTime, modular string
+	var authorId, likeNum, collectNum, commentNum int
+	err = stmtOut.QueryRow(vid).Scan(&id, &name, &authorId, &displayCTime, &modular, &likeNum, &collectNum, &commentNum)
 	if err != nil && err != sql.ErrNoRows {
 		return nil, err
 	}
@@ -160,15 +159,16 @@ func GetVideoInfo(vid string) (*def.VideoInfo, error) {
 		return nil, nil
 	}
 
-	res := &def.VideoInfo{Id: id, Name: name, AuthorId: authorId, DisplayCtime: displayCTime}
+	res := &def.VideoInfo{Id: id, Name: name, AuthorId: authorId, DisplayCtime: displayCTime, Modular: modular, LikeNum: likeNum, CollectNum: collectNum, CommentNum: commentNum}
 	defer stmtOut.Close()
 	return res, nil
 }
 
 func ListVideoInfo(uname string, from, n int) ([]*def.VideoInfo, error) {
-	stmtOut, err := dbConn.Prepare(`SELECT video_info.id, video_info.author_id, video_info.name, video_info.disply_ctime, modulars.name FROM video_info,modulars,users
-	WHERE users.username=(?) AND video_info.modular = modulars.id AND users.id = video_info.author_id
-	ORDER BY video_info.create_time DESC LIMIT (?),(?)`)
+	stmtOut, err := dbConn.Prepare(`SELECT video_info.id, video_info.author_id, video_info.name, video_info.create_time, modulars.name, like_number, collect_number, comment_number
+	FROM video_info,modulars,users
+	WHERE users.username=? AND video_info.modular = modulars.id AND users.id = video_info.author_id
+	ORDER BY video_info.create_time DESC LIMIT ?,?`)
 	if err != nil {
 		log.Printf("list db prepare error!\n")
 		return nil, err
@@ -180,16 +180,13 @@ func ListVideoInfo(uname string, from, n int) ([]*def.VideoInfo, error) {
 		return nil, err
 	}
 	for rows.Next() {
-		var vid string
-		var aid int
-		var vname string
-		var displayTime string
-		var modular string
-		err := rows.Scan(&vid, &aid, &vname, &displayTime, &modular)
+		var vid, vname, displayTime, modular string
+		var aid, likeNum, collectNum, commentNum int
+		err := rows.Scan(&vid, &aid, &vname, &displayTime, &modular, &likeNum, &collectNum, &commentNum)
 		if err != nil {
 			return nil, err
 		}
-		videoInfo := &def.VideoInfo{Id: vid, AuthorId: aid, Name: vname, DisplayCtime: displayTime, Modular: modular}
+		videoInfo := &def.VideoInfo{Id: vid, AuthorId: aid, Name: vname, DisplayCtime: displayTime, Modular: modular, LikeNum: likeNum, CollectNum: collectNum, CommentNum: commentNum}
 		res = append(res, videoInfo)
 	}
 
@@ -201,7 +198,7 @@ func ListVideoInfoMod(mod string, from, n int, mode string) ([]*def.VideoInfo, e
 	var stmtOut *sql.Stmt
 	var err error
 	if mode == "time" {
-		stmtOut, err = dbConn.Prepare(`SELECT video_info.id, video_info.author_id, video_info.name, video_info.disply_ctime, modulars.name 
+		stmtOut, err = dbConn.Prepare(`SELECT video_info.id, video_info.author_id, video_info.name, video_info.create_time, modulars.name, like_number, collect_number, comment_number
 		FROM video_info,modulars WHERE modulars.name=?
 		ORDER BY video_info.create_time DESC LIMIT ?,?`)
 		if err != nil {
@@ -209,7 +206,7 @@ func ListVideoInfoMod(mod string, from, n int, mode string) ([]*def.VideoInfo, e
 			return nil, err
 		}
 	} else if mode == "hot" {
-		stmtOut, err = dbConn.Prepare(`SELECT video_info.id, video_info.author_id, video_info.name, video_info.disply_ctime, modulars.name 
+		stmtOut, err = dbConn.Prepare(`SELECT video_info.id, video_info.author_id, video_info.name, video_info.create_time, modulars.name, like_number, collect_number, comment_number
 		FROM video_info,modulars WHERE modulars.name=?
 		ORDER BY video_info.hot DESC LIMIT ?,?`)
 		if err != nil {
@@ -231,16 +228,13 @@ func ListVideoInfoMod(mod string, from, n int, mode string) ([]*def.VideoInfo, e
 		return nil, err
 	}
 	for rows.Next() {
-		var vid string
-		var aid int
-		var vname string
-		var displayTime string
-		var modular string
-		err := rows.Scan(&vid, &aid, &vname, &displayTime, &modular)
+		var vid, vname, displayTime, modular string
+		var aid, likeNum, collectNum, commentNum int
+		err := rows.Scan(&vid, &aid, &vname, &displayTime, &modular, &likeNum, &collectNum, &commentNum)
 		if err != nil {
 			return nil, err
 		}
-		videoInfo := &def.VideoInfo{Id: vid, AuthorId: aid, Name: vname, DisplayCtime: displayTime, Modular: modular}
+		videoInfo := &def.VideoInfo{Id: vid, AuthorId: aid, Name: vname, DisplayCtime: displayTime, Modular: modular, LikeNum: likeNum, CollectNum: collectNum, CommentNum: commentNum}
 		res = append(res, videoInfo)
 	}
 

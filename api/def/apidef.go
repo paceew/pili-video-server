@@ -54,6 +54,14 @@ type MessageList struct {
 	Messages []*Message `json:"messages_list"`
 }
 
+type LikeNumber struct {
+	Count int `json:"like_num"`
+}
+
+type LikeStatus struct {
+	Like bool `json:"like"`
+}
+
 //Data model
 type User struct {
 	Id       int
@@ -72,6 +80,9 @@ type VideoInfo struct {
 	AuthorId     int    `json:"video_aid"`
 	DisplayCtime string `json:"video_ct"`
 	Modular      string `json:"video_mod"`
+	LikeNum      int    `json:"like_num"`
+	CollectNum   int    `json:"collect_num"`
+	CommentNum   int    `json:"comment_num"`
 }
 
 type CommentInfo struct {
