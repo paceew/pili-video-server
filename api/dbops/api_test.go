@@ -19,16 +19,16 @@ func TestMain(m *testing.M) {
 }
 
 //test like funtion
-func TestLikeVideo(t *testing.T) {
-	t.Run("fist get like count;\n", testLikeVideoCount)
-	t.Run("fist get islike;\n", testIsLike)
-	t.Run("fist like video;\n", testLikeVideo)
-	t.Run("secend get like count;\n", testLikeVideoCount)
-	t.Run("secend get islike;\n", testIsLike)
-	t.Run("secend like video;\n", testLikeVideo)
-	t.Run("third get like count;\n", testLikeVideoCount)
-	t.Run("third get islike;\n", testIsLike)
-}
+// func TestLikeVideo(t *testing.T) {
+// 	t.Run("fist get like count;\n", testLikeVideoCount)
+// 	t.Run("fist get islike;\n", testIsLike)
+// 	t.Run("fist like video;\n", testLikeVideo)
+// 	t.Run("secend get like count;\n", testLikeVideoCount)
+// 	t.Run("secend get islike;\n", testIsLike)
+// 	t.Run("secend like video;\n", testLikeVideo)
+// 	t.Run("third get like count;\n", testLikeVideoCount)
+// 	t.Run("third get islike;\n", testIsLike)
+// }
 
 func testLikeVideoCount(t *testing.T) {
 	count, err := LikeCount("567")
@@ -55,12 +55,12 @@ func testLikeVideo(t *testing.T) {
 }
 
 //test user work flow
-func TestUserWorkFlow(t *testing.T) {
-	t.Run("Add", testAddUser)
-	t.Run("Get", testGetUser)
-	t.Run("Modify", testModifyPwd)
-	t.Run("Credential", testGetUserCredential)
-}
+// func TestUserWorkFlow(t *testing.T) {
+// 	t.Run("Add", testAddUser)
+// 	t.Run("Get", testGetUser)
+// 	t.Run("Modify", testModifyPwd)
+// 	t.Run("Credential", testGetUserCredential)
+// }
 
 func testAddUser(t *testing.T) {
 	err := AddUser("pace", "123")
@@ -141,22 +141,23 @@ var (
 	vid string
 )
 
-//test video work flow
-// func TestVideoWorkFlow(t *testing.T) {
-// 	t.Run("add new video", testAddNewVideo)
-// 	t.Run("get video", testGetVideoInfo)
-// 	t.Run("list video", testListVideoInfo)
-// 	t.Run("delete video", testDeleteVideoInfo)
+// test video work flow
+func TestVideoWorkFlow(t *testing.T) {
+	// t.Run("add new video", testAddNewVideo)
+	// t.Run("get video", testGetVideoInfo)
+	t.Run("list video", testListVideoInfo)
+	t.Run("list video by mod hot", testListVideoInfoMod)
+	// t.Run("delete video", testDeleteVideoInfo)
 
-// }
+}
 
-// func testAddNewVideo(t *testing.T) {
-// 	err := AddNewVideo(7, "video_1")
-// 	if err != nil {
-// 		t.Errorf("add new video error: %v\n", err)
-// 	}
-// 	//	vid = videoinfo.Id
-// }
+func testAddNewVideo(t *testing.T) {
+	_, err := AddNewVideo(7, "video_1")
+	if err != nil {
+		t.Errorf("add new video error: %v\n", err)
+	}
+	//	vid = videoinfo.Id
+}
 
 func testGetVideoInfo(t *testing.T) {
 	_, err := GetVideoInfo(vid)
@@ -166,7 +167,14 @@ func testGetVideoInfo(t *testing.T) {
 }
 
 func testListVideoInfo(t *testing.T) {
-	_, err := ListVideoInfo("pace-wang", 1, 100)
+	_, err := ListVideoInfo("pace-wang", 0, 100)
+	if err != nil {
+		t.Errorf("list videoinfo error:%v\n", err)
+	}
+}
+
+func testListVideoInfoMod(t *testing.T) {
+	_, err := ListVideoInfoMod("other", 0, 100, "hot")
 	if err != nil {
 		t.Errorf("list videoinfo error:%v\n", err)
 	}
@@ -180,11 +188,11 @@ func testDeleteVideoInfo(t *testing.T) {
 }
 
 //test comment work flow
-func TestCommentWorkFlow(t *testing.T) {
-	t.Run("add comment", testAddNewComment)
-	t.Run("list comment", testListComment)
-	//	t.Run("delete comment", testDeleteComment)
-}
+// func TestCommentWorkFlow(t *testing.T) {
+// 	t.Run("add comment", testAddNewComment)
+// 	t.Run("list comment", testListComment)
+// 	//	t.Run("delete comment", testDeleteComment)
+// }
 
 func testAddNewComment(t *testing.T) {
 	err := AddNewComment(7, "5616", "good")

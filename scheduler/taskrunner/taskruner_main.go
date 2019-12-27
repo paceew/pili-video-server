@@ -26,7 +26,7 @@ func (w *Worker) startWorker() {
 }
 
 func Start() {
-	r := NewRunner(5, true, VideoClearDispatcher, VideoClearExecutor)
-	w := NewWorker(5, r)
-	go w.startWorker()
+	rDel := NewRunner(5, true, VideoClearDispatcher, VideoClearExecutor)
+	wDel := NewWorker(5, rDel)
+	go wDel.startWorker()
 }

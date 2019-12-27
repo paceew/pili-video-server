@@ -6,6 +6,7 @@ const (
 	CLOSE             = "c"
 
 	VIDEOS_PATH = "./videos/"
+	ICON_PATH   = "./icon/"
 )
 
 type controlChan chan string

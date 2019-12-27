@@ -11,8 +11,14 @@ import (
 )
 
 func deleteVideo(vid string) error {
-	path, _ := filepath.Abs(VIDEOS_PATH + vid)
-	err := os.Remove(path)
+	pathVd, _ := filepath.Abs(VIDEOS_PATH + vid)
+	pathIc, _ := filepath.Abs(ICON_PATH + vid)
+	err := os.Remove(pathVd)
+	if err != nil && !os.IsNotExist(err) {
+		log.Printf("delete video_id: %v error!\n", err)
+		return err
+	}
+	err = os.Remove(pathIc)
 	if err != nil && !os.IsNotExist(err) {
 		log.Printf("delete video_id: %v error!\n", err)
 		return err

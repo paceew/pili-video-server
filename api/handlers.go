@@ -207,7 +207,7 @@ func ListAllVideosByUser(w http.ResponseWriter, r *http.Request, p httprouter.Pa
 	//	io.WriteString(w, "List all videos of:"+uname)
 }
 
-func ListAllVideosByMod(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+func ListAllVideosByModTim(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 	fromstr := p.ByName("page")
 	fromint, err := strconv.Atoi(fromstr)
 	if err != nil {
@@ -217,7 +217,33 @@ func ListAllVideosByMod(w http.ResponseWriter, r *http.Request, p httprouter.Par
 	}
 
 	mod := p.ByName("modular")
-	videoList, err := dbops.ListVideoInfoMod(mod, fromint, def.PAGE_NUM)
+	videoList, err := dbops.ListVideoInfoMod(mod, fromint, def.PAGE_NUM, "time")
+	if err != nil {
+		log.Print("list video db error!\n")
+		sendErrorResponse(w, def.ErrorDBError)
+		return
+	}
+
+	videos := &def.VideosList{Videos: videoList}
+	if resp, err := json.Marshal(videos); err != nil {
+		sendErrorResponse(w, def.ErrorInternalFaults)
+		return
+	} else {
+		sendNormalResponse(w, string(resp), 200)
+	}
+}
+
+func ListAllVideosByModHot(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+	fromstr := p.ByName("page")
+	fromint, err := strconv.Atoi(fromstr)
+	if err != nil {
+		log.Print("fromstr error:%v!\n", err)
+		sendErrorResponse(w, def.ErrorRequestBodyPaseFailed)
+		return
+	}
+
+	mod := p.ByName("modular")
+	videoList, err := dbops.ListVideoInfoMod(mod, fromint, def.PAGE_NUM, "hot")
 	if err != nil {
 		log.Print("list video db error!\n")
 		sendErrorResponse(w, def.ErrorDBError)

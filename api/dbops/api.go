@@ -197,14 +197,33 @@ func ListVideoInfo(uname string, from, n int) ([]*def.VideoInfo, error) {
 	return res, nil
 }
 
-func ListVideoInfoMod(mod string, from, n int) ([]*def.VideoInfo, error) {
-	stmtOut, err := dbConn.Prepare(`SELECT video_info.id, video_info.author_id, video_info.name, video_info.disply_ctime, modulars.name 
-	FROM video_info,modulars WHERE modulars.name=?
-	ORDER BY video_info.create_time DESC LIMIT ?,?`)
-	if err != nil {
-		log.Printf("list db prepare error!\n")
-		return nil, err
+func ListVideoInfoMod(mod string, from, n int, mode string) ([]*def.VideoInfo, error) {
+	var stmtOut *sql.Stmt
+	var err error
+	if mode == "time" {
+		stmtOut, err = dbConn.Prepare(`SELECT video_info.id, video_info.author_id, video_info.name, video_info.disply_ctime, modulars.name 
+		FROM video_info,modulars WHERE modulars.name=?
+		ORDER BY video_info.create_time DESC LIMIT ?,?`)
+		if err != nil {
+			log.Printf("list db prepare error!\n")
+			return nil, err
+		}
+	} else if mode == "hot" {
+		stmtOut, err = dbConn.Prepare(`SELECT video_info.id, video_info.author_id, video_info.name, video_info.disply_ctime, modulars.name 
+		FROM video_info,modulars WHERE modulars.name=?
+		ORDER BY video_info.hot DESC LIMIT ?,?`)
+		if err != nil {
+			log.Printf("list db prepare error!\n")
+			return nil, err
+		}
 	}
+	// stmtOut, err := dbConn.Prepare(`SELECT video_info.id, video_info.author_id, video_info.name, video_info.disply_ctime, modulars.name
+	// FROM video_info,modulars WHERE modulars.name=?
+	// ORDER BY video_info.create_time DESC LIMIT ?,?`)
+	// if err != nil {
+	// 	log.Printf("list db prepare error!\n")
+	// 	return nil, err
+	// }
 
 	var res []*def.VideoInfo
 	rows, err := stmtOut.Query(mod, from, n)

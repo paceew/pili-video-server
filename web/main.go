@@ -6,6 +6,21 @@ import (
 	"github.com/julienschmidt/httprouter"
 )
 
+type middleWareHandler struct {
+	r *httprouter.Router
+}
+
+func NewMiddleWareHandler(r *httprouter.Router) http.Handler {
+	m := middleWareHandler{}
+	m.r = r
+	return m
+}
+
+func (m middleWareHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Access-Control-Allow-Origin", "*") //允许访问所有域
+	m.r.ServeHTTP(w, r)
+}
+
 func RegistHandler() *httprouter.Router {
 	router := httprouter.New()
 
@@ -30,5 +45,6 @@ func RegistHandler() *httprouter.Router {
 
 func main() {
 	r := RegistHandler()
-	http.ListenAndServe(":8080", r)
+	mh := NewMiddleWareHandler(r)
+	http.ListenAndServe(":8080", mh)
 }

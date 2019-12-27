@@ -40,8 +40,8 @@ func RegisterHandlers() *httprouter.Router {
 	router.DELETE("/user/:user_name/videos/:vid_id", DeleteVideo)
 	router.POST("/user/:user_name/videos", AddNewVideo)
 	router.GET("/user/:user_name/video/:vid_id", GetVideo)
-	// router.GET("/videos/:vid_id", GetVideo)
-	router.GET("/video/:modular/:page", ListAllVideosByMod)
+	router.GET("/video/:modular/tim/:page", ListAllVideosByModTim)
+	router.GET("/video/:modular/hot/:page", ListAllVideosByModHot)
 
 	//videos like handler
 	router.POST("/archive/video/:vid_id/like", LikeVideo)
