@@ -42,10 +42,15 @@ func RegisterHandlers() *httprouter.Router {
 	router.DELETE("/user/:user_name/video/:vid_id", DeleteVideo)
 	router.POST("/user/:user_name/video", AddNewVideo)
 	// router.POST("/user/:user_name/video/:vid_id/itd", AddIntroduction)
-	router.GET("/user/:user_name/video/:vid_id", GetVideo)
-	router.GET("/user/:user_name/video/:vid_id/itd", GetIntroduction)
+	// router.GET("/user/:user_name/video/:vid_id", GetVideo)
+	router.GET("/res/video/:vid_id", GetVideo)
+	router.GET("/res/r/video/:page", RankVideo)
+	router.GET("/res/video/:vid_id/itd", GetIntroduction)
 	router.GET("/video/:modular/tim/:page", ListAllVideosByModTim)
 	router.GET("/video/:modular/hot/:page", ListAllVideosByModHot)
+
+	//video search
+	router.GET("/videos/:key/:page", VideoSearch)
 
 	//videos like handler
 	router.POST("/archive/video/:vid_id/like", LikeVideo)
@@ -53,9 +58,9 @@ func RegisterHandlers() *httprouter.Router {
 	router.GET("/archive/video/:vid_id/islike", IsLike)
 
 	//comments handler
-	router.GET("/videos/:vid_id/comments", ListComments)
-	router.POST("/videos/:vid_id/comments", AddNewComment)
-	router.DELETE("/videos/:vid_id/comments/:com_id", DeleteComment)
+	// router.GET("/videos/:vid_id/comments", ListComments)
+	// router.POST("/videos/:vid_id/comments", AddNewComment)
+	// router.DELETE("/videos/:vid_id/comments/:com_id", DeleteComment)
 
 	//messages handler
 	router.GET("/user/:user_name/mess_num", GetUnreadMessages)

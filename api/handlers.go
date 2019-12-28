@@ -259,6 +259,57 @@ func ListAllVideosByModHot(w http.ResponseWriter, r *http.Request, p httprouter.
 	}
 }
 
+func VideoSearch(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+	key := p.ByName("key")
+	fromstr := p.ByName("page")
+	fromint, err := strconv.Atoi(fromstr)
+	if err != nil {
+		log.Print("fromstr error:%v!\n", err)
+		sendErrorResponse(w, def.ErrorRequestBodyPaseFailed)
+		return
+	}
+
+	videoList, err := dbops.VideoSearch(key, fromint, def.PAGE_NUM)
+	if err != nil {
+		log.Printf("list video db error!:%v\n", err)
+		sendErrorResponse(w, def.ErrorDBError)
+		return
+	}
+
+	videos := &def.VideosList{Videos: videoList}
+	if resp, err := json.Marshal(videos); err != nil {
+		sendErrorResponse(w, def.ErrorInternalFaults)
+		return
+	} else {
+		sendNormalResponse(w, string(resp), 200)
+	}
+}
+
+func RankVideo(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+	fromStr := p.ByName("page")
+	fromInt, err := strconv.Atoi(fromStr)
+	if err != nil {
+		log.Print("fromstr error:%v!\n", err)
+		sendErrorResponse(w, def.ErrorRequestBodyPaseFailed)
+		return
+	}
+
+	videoList, err := dbops.RankVideoInfo(fromInt, def.PAGE_NUM)
+	if err != nil {
+		log.Printf("list video db error!:%v\n", err)
+		sendErrorResponse(w, def.ErrorDBError)
+		return
+	}
+
+	videos := &def.VideosList{Videos: videoList}
+	if resp, err := json.Marshal(videos); err != nil {
+		sendErrorResponse(w, def.ErrorInternalFaults)
+		return
+	} else {
+		sendNormalResponse(w, string(resp), 200)
+	}
+}
+
 func GetVideo(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 	//验证用户是否登陆
 	// if !ValidateLogin(w, r) {
@@ -269,12 +320,12 @@ func GetVideo(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 	vid := p.ByName("vid_id")
 	res, err := dbops.GetVideoInfo(vid)
 	if err != nil {
-		log.Printf("get video info db error!\n")
+		log.Printf("get video info db error:%v!\n", err)
 		sendErrorResponse(w, def.ErrorDBError)
 		return
 	}
 
-	video_info := &def.VideoInfo{Id: res.Id, Name: res.Name, DisplayCtime: res.DisplayCtime, AuthorId: res.AuthorId}
+	video_info := &def.VideoInfo{Id: res.Id, Name: res.Name, DisplayCtime: res.DisplayCtime, AuthorName: res.AuthorName}
 	if resp, err := json.Marshal(video_info); err != nil {
 		sendErrorResponse(w, def.ErrorInternalFaults)
 		return
@@ -349,18 +400,18 @@ func AddNewVideo(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 
 	mid, err := dbops.GetModIdByName(video.Modular)
 	if err != nil {
-		log.Printf("mid : %v get modular id error : %v\n", aid, err)
+		log.Printf("mid : %v get modular id error : %v\n", mid, err)
 		sendErrorResponse(w, def.ErrorDBError)
 		return
 	}
 
-	vInfo := &def.VideoInfo{}
-	vInfo, err = dbops.AddNewVideo(aid, video.VideoName, mid, video.Introdution)
+	vid, err := dbops.AddNewVideo(aid, video.VideoName, mid, video.Introdution)
 	if err != nil {
-		log.Printf("aid : %v add new video error:%v\n", aid, err)
+		log.Printf(" add new video error:%v\n", err)
 		sendErrorResponse(w, def.ErrorDBError)
 		return
 	} else {
+		vInfo := &def.VideoInfo{Id: vid}
 		if resp, err := json.Marshal(vInfo); err != nil {
 			sendErrorResponse(w, def.ErrorInternalFaults)
 			return

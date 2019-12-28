@@ -145,19 +145,27 @@ var (
 func TestVideoWorkFlow(t *testing.T) {
 	// t.Run("add new video", testAddNewVideo)
 	// t.Run("get video", testGetVideoInfo)
-	t.Run("list video", testListVideoInfo)
-	t.Run("list video by mod hot", testListVideoInfoMod)
+	// t.Run("list video", testListVideoInfo)
+	// t.Run("list video by mod hot", testListVideoInfoMod)
 	// t.Run("delete video", testDeleteVideoInfo)
+	t.Run("search video", testVdieoSearch)
 
 }
 
-func testAddNewVideo(t *testing.T) {
-	_, err := AddNewVideo(7, "video_1")
+func testVdieoSearch(t *testing.T) {
+	_, err := VideoSearch("柯", 0, 10)
 	if err != nil {
-		t.Errorf("add new video error: %v\n", err)
+		t.Errorf("list videoinfo error:%v\n", err)
 	}
-	//	vid = videoinfo.Id
 }
+
+// func testAddNewVideo(t *testing.T) {
+// 	_, err := AddNewVideo(7, "video_1")
+// 	if err != nil {
+// 		t.Errorf("add new video error: %v\n", err)
+// 	}
+// 	//	vid = videoinfo.Id
+// }
 
 func testGetVideoInfo(t *testing.T) {
 	_, err := GetVideoInfo(vid)

@@ -83,7 +83,7 @@ type SimpleSession struct {
 type VideoInfo struct {
 	Id           string `json:"video_id"`
 	Name         string `json:"video_name"`
-	AuthorId     int    `json:"video_aid"`
+	AuthorName   string `json:"video_aName"`
 	DisplayCtime string `json:"video_ct"`
 	Modular      string `json:"video_mod"`
 	LikeNum      int    `json:"like_num"`
