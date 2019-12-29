@@ -9,6 +9,7 @@ type Worker struct {
 	runner *Runner
 }
 
+//每隔interval 时间执行一次r
 func NewWorker(interval time.Duration, r *Runner) *Worker {
 	return &Worker{
 		ticker: time.NewTicker(interval * time.Second),
@@ -27,6 +28,6 @@ func (w *Worker) startWorker() {
 
 func Start() {
 	rDel := NewRunner(5, true, VideoClearDispatcher, VideoClearExecutor)
-	wDel := NewWorker(5, rDel)
+	wDel := NewWorker(INTERVAL, rDel)
 	go wDel.startWorker()
 }

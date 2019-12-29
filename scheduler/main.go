@@ -5,6 +5,7 @@ import (
 
 	"github.com/julienschmidt/httprouter"
 	"github.com/pili-video-server/scheduler/taskrunner"
+	"github.com/pili-video-server/scheduler/timertask"
 )
 
 func RegistHandler() *httprouter.Router {
@@ -16,6 +17,7 @@ func RegistHandler() *httprouter.Router {
 }
 func main() {
 	go taskrunner.Start()
+	go timertask.Start()
 	r := RegistHandler()
 	http.ListenAndServe(":9001", r)
 }

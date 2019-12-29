@@ -7,6 +7,8 @@ const (
 
 	VIDEOS_PATH = "./videos/"
 	ICON_PATH   = "./icon/"
+
+	INTERVAL = 360 // 时间间隔360s
 )
 
 type controlChan chan string
