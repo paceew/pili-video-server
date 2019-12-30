@@ -21,13 +21,18 @@ func (w *Worker) startWorker() {
 	for {
 		select {
 		case <-w.ticker.C:
-			go w.runner.StartAll()
+			w.runner.StartAll()
 		}
 	}
 }
 
 func Start() {
 	rDel := NewRunner(5, true, VideoClearDispatcher, VideoClearExecutor)
-	wDel := NewWorker(INTERVAL, rDel)
+	wDel := NewWorker(INTERVAL_DEL, rDel)
 	go wDel.startWorker()
+
+	// tr 转换码率
+	rFm := NewRunner(1, true, VideoFormatDispatcher, VideoFormatExecutor)
+	wFm := NewWorker(INTERVAL_FM, rFm)
+	go wFm.startWorker()
 }

@@ -39,7 +39,7 @@ func RegisterHandler() *httprouter.Router {
 
 	router.GET("/test", testPageHandler)
 
-	router.GET("/video/:vid_id", streamHandler)
+	router.GET("/video/:vid_id/:mat", streamHandler)
 	router.POST("/video/:vid_id", uploadHandler)
 
 	router.GET("/icon/:vid_id", GetIcon)

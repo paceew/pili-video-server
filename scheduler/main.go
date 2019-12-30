@@ -13,6 +13,8 @@ func RegistHandler() *httprouter.Router {
 
 	router.GET("/video_del/:vid_id", AddDelection)
 
+	router.GET("/video_format/:vid_id", AddUnFormat)
+
 	return router
 }
 func main() {

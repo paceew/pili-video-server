@@ -10,6 +10,7 @@ import (
 
 	"github.com/julienschmidt/httprouter"
 	"github.com/pili-video-server/streamserver/def"
+	"github.com/pili-video-server/streamserver/utils"
 )
 
 func testPageHandler(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
@@ -23,7 +24,18 @@ func testPageHandler(w http.ResponseWriter, r *http.Request, p httprouter.Params
 
 func streamHandler(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 	vid := p.ByName("vid_id")
-	vl := def.VIDEO_DIR + vid
+	var vl string
+	mat := p.ByName("mat")
+	switch mat {
+	case "org":
+		vl = def.VIDEO_DIR_ORG + vid
+	case "720":
+		vl = def.VIDEO_DIR_720 + vid + def.VIDEO_FROMAT
+	case "480":
+		vl = def.VIDEO_DIR_480 + vid + def.VIDEO_FROMAT
+	case "360":
+		vl = def.VIDEO_DIR_360 + vid + def.VIDEO_FROMAT
+	}
 	log.Printf("video url: %v\n", vl)
 	video, err := os.Open(vl)
 	if err != nil {
@@ -62,7 +74,7 @@ func uploadHandler(w http.ResponseWriter, r *http.Request, p httprouter.Params) 
 
 	vid := p.ByName("vid_id")
 	log.Printf("uploading vid : %v\n", vid)
-	err = ioutil.WriteFile(def.VIDEO_DIR+vid, data, 0666)
+	err = ioutil.WriteFile(def.VIDEO_DIR_ORG+vid, data, 0666)
 	if err != nil {
 		log.Printf("io write error : %v\n", err)
 		sendErrorResponse(w, def.ErrorInternalFaults)
@@ -91,7 +103,8 @@ func uploadHandler(w http.ResponseWriter, r *http.Request, p httprouter.Params) 
 		return
 	}
 
-	//	utils.Proxy(w, r)                     上传转发
+	//发送转码请求到scheduler
+	go utils.SendFormatVideoRequest(vid)
 	sendNormalResponse(w, "upload ok !", 201)
 }
 

@@ -8,6 +8,9 @@ import (
 	"github.com/pili-video-server/scheduler/def"
 )
 
+type Task struct {
+}
+
 //收藏*0.3 + 点赞*0.4 + 评论*0.5 新视频（一天内发布）[提权,总值*1.5]
 func calculaHot(data *def.VideoData) float32 {
 	hot := float32(data.CollNum)*0.3 + float32(data.LikeNum)*0.4 + float32(data.CommNum)*0.5
@@ -29,7 +32,8 @@ func calculaHot(data *def.VideoData) float32 {
 }
 
 //先读出所有video data 然后根据每个vid去redis读取likeNum，然后计算每个video hot 再写入video data
-func TaskCountHot() {
+func (t *Task) TaskCountHot() {
+	log.Printf("begin to count hot !\n")
 	data, err := dbops.ReadData()
 	if err != nil {
 		log.Printf("db error:%v\n", err)

@@ -5,10 +5,16 @@ const (
 	READY_TO_EXECUTE  = "e"
 	CLOSE             = "c"
 
-	VIDEOS_PATH = "./videos/"
-	ICON_PATH   = "./icon/"
+	VIDEOS_PATH   = "./videos/original/"
+	VIDEOS_PATH2  = "./videos/720p/"
+	VIDEOS_PATH3  = "./videos/480p/"
+	VIDEOS_PATH4  = "./videos/360p/"
+	VIDEOS_FORMAT = ".mp4"
+	ICON_PATH     = "./icon/"
 
-	INTERVAL = 360 // 时间间隔360s
+	INTERVAL_DEL = 360 // 删除视频时间间隔360s
+
+	INTERVAL_FM = 180 // 视频转码时间间隔180s
 )
 
 type controlChan chan string

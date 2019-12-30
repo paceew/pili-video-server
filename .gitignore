@@ -3,5 +3,6 @@ scheduler_p
 streamserver_p
 web_p
 vendor
+test
 icon/*
 videos/*

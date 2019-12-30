@@ -9,7 +9,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/pace/sample/api/def"
+	"github.com/pili-video-server/api/def"
 )
 
 func NewUUID() (string, error) {
@@ -31,7 +31,7 @@ func GetCurrentTimestampSec() int {
 }
 
 func SendDeleteVideoRequest(vid string) {
-	url := "http://" + def.SCHEDULER_ADDR + "video_del" + vid
+	url := "http://" + def.SCHEDULER_ADDR + "video_del/" + vid
 	_, err := http.Get(url)
 	if err != nil {
 		log.Printf("internal error:%v!\n", err)
@@ -39,3 +39,12 @@ func SendDeleteVideoRequest(vid string) {
 	}
 
 }
+
+// func SendFormatVideoRequest(vid string) {
+// 	url := "http://" + def.SCHEDULER_ADDR + "video_format/" + vid
+// 	_, err := http.Get(url)
+// 	if err != nil {
+// 		log.Printf("internal error:%v!\n", err)
+// 		return
+// 	}
+// }

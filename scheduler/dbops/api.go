@@ -9,7 +9,7 @@ import (
 )
 
 func AddDeletion(vid string) error {
-	stmtIns, err := dbConn.Prepare("INSERT INTO delect_vid(id) VALUES ?")
+	stmtIns, err := dbConn.Prepare("INSERT INTO delect_vid(id) VALUES (?)")
 	if err != nil {
 		log.Printf("add deletionID db prepare error: %v\n", err)
 		return err
@@ -85,7 +85,7 @@ func ReadData() ([]*def.VideoData, error) {
 	for rows.Next() {
 		var likeNum, collNum, commNum int
 		var time, vid string
-		err := rows.Scan(&vid, &likeNum, &collNum, &commNum, time)
+		err := rows.Scan(&vid, &likeNum, &collNum, &commNum, &time)
 		if err != nil {
 			return nil, err
 		}
@@ -100,24 +100,35 @@ func ReadData() ([]*def.VideoData, error) {
 //批量写入数据到video
 func WriteData(data []*def.VideoData) error {
 	//构建批量插入sql
-	sqlStr := "INSERT INTO video_info(like_number,hot) VALUES "
+	sqlStr := `UPDATE video_info SET like_number = CASE id `
 	var vals []interface{}
 
 	for _, row := range data {
-		sqlStr += "(?,?),"
-		vals = append(vals, row.LikeNum, row.Hot)
+		sqlStr += "WHEN ? THEN ? "
+		vals = append(vals, row.Vid, row.LikeNum)
 	}
-
-	sqlStr = sqlStr[0 : len(sqlStr)-2]
-
+	sqlStr += "END, hot = CASE id "
+	for _, row := range data {
+		sqlStr += "WHEN ? THEN ? "
+		vals = append(vals, row.Vid, row.Hot)
+	}
+	sqlStr += "END WHERE id IN ("
+	for _, row := range data {
+		sqlStr += "?,"
+		vals = append(vals, row.Vid)
+	}
+	sqlStr = sqlStr[0 : len(sqlStr)-1]
+	sqlStr += ")"
+	// log.Printf(sqlStr)
 	stmtIns, err := dbConn.Prepare(sqlStr)
 	if err != nil {
-		log.Printf("db error :%v!\n", err)
+		log.Printf("db prepare error :%v!\n", err)
 		return err
 	}
 
-	_, err = stmtIns.Exec(vals)
+	_, err = stmtIns.Exec(vals...)
 	if err != nil {
+		log.Printf("db exec error:%v\n", err)
 		return err
 	}
 
@@ -136,4 +147,65 @@ func ReadLikeNum(vid string) (int, error) {
 	Num, _ := redis.Int(conn.Do("scard", likestr))
 
 	return Num, nil
+}
+
+func AddUnFormat(vid string) error {
+	stmtIns, err := dbConn.Prepare("INSERT INTO unfomar_vid VALUES (?)")
+	if err != nil {
+		log.Printf("db prepare error: %v\n", err)
+		return err
+	}
+
+	_, err = stmtIns.Exec(vid)
+	if err != nil {
+		log.Printf("db error: %v\n", err)
+		return err
+	}
+
+	defer stmtIns.Close()
+	return nil
+}
+
+func ReadUnFormat(count int) ([]string, error) {
+	var ids []string
+	stmtOut, err := dbConn.Prepare("SELECT id FROM unfomar_vid LIMIT ?")
+	if err != nil {
+		log.Printf("db prepare error: %v!\n", err)
+		return ids, err
+	}
+
+	rows, err := stmtOut.Query(count)
+	if err != nil {
+		log.Printf("db error: %v\n", err)
+		return ids, err
+	}
+	for rows.Next() {
+		var id string
+		if err := rows.Scan(&id); err != nil {
+			return ids, err
+		}
+		ids = append(ids, id)
+	}
+
+	defer stmtOut.Close()
+	return ids, nil
+
+}
+
+func DeleteUnFormat(vid string) error {
+	stmtDel, err := dbConn.Prepare("DELETE FROM unfomar_vid WHERE id = ?")
+	if err != nil {
+		log.Printf("db prepare error: %v\n", err)
+		return err
+	}
+
+	_, err = stmtDel.Exec(vid)
+	if err != nil {
+		log.Printf(" db exec error: %v\n", err)
+		return err
+	}
+
+	defer stmtDel.Close()
+	return nil
+
 }
