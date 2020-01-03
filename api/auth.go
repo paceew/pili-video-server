@@ -15,11 +15,10 @@ var HEADER_FIELD_USERNAME = "X-User-Name"
 
 //验证session如果存在则重设session并且设置requset header X-User-Name
 func validateUserSession(r *http.Request) bool {
-	log.Printf("validating User Session ...\n")
-	sid := r.Header.Get(HEADER_FIELD_SESSION)
+	// log.Printf("validating User Session ...\n")
+	sid := r.Header.Get("Authorization")
 	if len(sid) == 0 {
-		uname := r.Header.Get(HEADER_FIELD_USERNAME)
-		log.Printf("X-Session-Id : %v,X-User-Name :%v", sid, uname)
+		r.Header.Add(HEADER_FIELD_USERNAME, "")
 		return false
 	}
 
@@ -43,6 +42,22 @@ func ValidateUser(w http.ResponseWriter, r *http.Request, p httprouter.Params) b
 	pname := p.ByName("user_name")
 	log.Printf("header name : %v,pname: %v!\n", uname, pname)
 	if len(uname) == 0 || len(pname) == 0 || pname != uname {
+		sendErrorResponse(w, def.ErrorNotAuthUser)
+		return false
+	}
+
+	return true
+}
+
+func VailidateAdmin(w http.ResponseWriter, r *http.Request, p httprouter.Params) bool {
+	aname := r.Header.Get(HEADER_FIELD_USERNAME)
+	pname := p.ByName("admin_name")
+	if len(aname) == 0 || len(pname) == 0 || pname != aname {
+		sendErrorResponse(w, def.ErrorNotAuthUser)
+		return false
+	}
+
+	if !dbops.IsAdmin(aname) {
 		sendErrorResponse(w, def.ErrorNotAuthUser)
 		return false
 	}

@@ -21,6 +21,7 @@ func (m middleWareHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	//允许访问所有域
 	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
 	m.r.ServeHTTP(w, r)
 	//releaseConnect
 	defer m.cl.ReleaseConn()

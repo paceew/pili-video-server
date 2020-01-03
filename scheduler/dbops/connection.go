@@ -16,7 +16,7 @@ var (
 
 func init() {
 	fmt.Println("Entering conn.go init function...")
-	dbConn, err = sql.Open("mysql", "pace:123@/piliVideo")
+	dbConn, err = sql.Open("mysql", "root:root@tcp(172.19.21.7:3306)/pilipala?charset=utf8")
 	if err != nil {
 		panic(err.Error())
 	}

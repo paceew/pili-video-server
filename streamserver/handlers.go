@@ -29,11 +29,11 @@ func streamHandler(w http.ResponseWriter, r *http.Request, p httprouter.Params) 
 	switch mat {
 	case "org":
 		vl = def.VIDEO_DIR_ORG + vid
-	case "720":
+	case "720p":
 		vl = def.VIDEO_DIR_720 + vid + def.VIDEO_FROMAT
-	case "480":
+	case "480p":
 		vl = def.VIDEO_DIR_480 + vid + def.VIDEO_FROMAT
-	case "360":
+	case "360p":
 		vl = def.VIDEO_DIR_360 + vid + def.VIDEO_FROMAT
 	}
 	log.Printf("video url: %v\n", vl)

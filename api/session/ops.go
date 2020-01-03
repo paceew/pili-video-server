@@ -67,6 +67,26 @@ func GenerateNewSessionId(username string) string {
 	return id
 }
 
+func SetNewSession(uname, sID string) {
+	session := &def.SimpleSession{Id: sID, Username: uname}
+
+	conn := dbops.Pool.Get()
+	if conn == nil {
+		log.Printf("generate new session error!\n")
+	}
+	value, err := json.Marshal(session)
+	if err != nil {
+		log.Printf("marshal session error:%v!\n", err)
+	}
+
+	_, err = conn.Do("SET", session.Id, value, "EX", 86400)
+	if err != nil {
+		log.Printf("someting error:%v!\n", err)
+	}
+
+	defer conn.Close()
+}
+
 func DeleteExpiredSession(sid string) {
 	conn := dbops.Pool.Get()
 	if conn == nil {

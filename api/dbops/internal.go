@@ -1,6 +1,7 @@
 package dbops
 
 import (
+	"database/sql"
 	"encoding/json"
 	"log"
 
@@ -90,6 +91,21 @@ import (
 // 	defer stmtOut.Close()
 // 	return nil
 // }
+
+func IsAdmin(aname string) bool {
+	stmtOut, err := dbConn.Prepare("SELECT * FROM admins WHERE admins.name = ?")
+	if err != nil {
+		log.Printf("db prepar error :%v\n", err)
+		return false
+	}
+
+	_, err = stmtOut.Query(aname)
+	if err != nil && err != sql.ErrNoRows {
+		return false
+	}
+
+	return true
+}
 
 func GetUserNameByVid(vid string) (string, error) {
 	stmtout, err := dbConn.Prepare("SELECT users.username From users, video_info WHERE video_info.author_id = users.id WHERE video_info.id = ?")

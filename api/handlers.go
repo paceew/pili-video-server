@@ -175,12 +175,28 @@ func ModifyUserInfo(w http.ResponseWriter, r *http.Request, p httprouter.Params)
 	io.WriteString(w, "modify user info!")
 }
 
+func SetSession(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+	uname := p.ByName("user_name")
+	sID := p.ByName("session_id")
+	log.Printf("set sessionID:%v, uname:%v", sID, uname)
+	session.SetNewSession(uname, sID)
+
+}
+
+func DelSession(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+	uname := p.ByName("user_name")
+	sID := p.ByName("session_id")
+	log.Printf("del sessionID:%v, uname:%v", sID, uname)
+	session.DeleteExpiredSession(sID)
+}
+
 func ListAllVideosByUser(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 	//验证用户是否登陆
-	// if !ValidateLogin(w, r) {
-	// 	log.Printf("Unauthorized user\n")
-	// 	return
-	// }
+	if !ValidateUser(w, r, p) {
+		log.Printf("Unauthorized user\n")
+		return
+	}
+
 	fromstr := p.ByName("page")
 	fromint, err := strconv.Atoi(fromstr)
 	if err != nil {
@@ -190,20 +206,50 @@ func ListAllVideosByUser(w http.ResponseWriter, r *http.Request, p httprouter.Pa
 	}
 
 	uname := p.ByName("user_name")
-	videoList, err := dbops.ListVideoInfo(uname, fromint, def.PAGE_NUM)
-	if err != nil {
-		log.Print("list video db error:%v!\n", err)
-		sendErrorResponse(w, def.ErrorDBError)
-		return
+	flag := p.ByName("exam")
+	log.Printf("uname:%v,flag:%v\n", uname, flag)
+	if flag == "exam" {
+		videoList, err := dbops.ListVideoInfoNoExam(uname, fromint, def.PAGE_NUM*2)
+		if err != nil {
+			log.Print("list video db error:%v!\n", err)
+			sendErrorResponse(w, def.ErrorDBError)
+			return
+		}
+
+		videos := &def.VideoInfoNoExamList{Videos: videoList}
+		if resp, err := json.Marshal(videos); err != nil {
+			sendErrorResponse(w, def.ErrorInternalFaults)
+			return
+		} else {
+			sendNormalResponse(w, string(resp), 200)
+			return
+		}
+	} else {
+		videoList, err := dbops.ListVideoInfo(uname, fromint, def.PAGE_NUM*2)
+		if err != nil {
+			log.Print("list video db error:%v!\n", err)
+			sendErrorResponse(w, def.ErrorDBError)
+			return
+		}
+
+		videos := &def.VideosList{Videos: videoList}
+		if resp, err := json.Marshal(videos); err != nil {
+			sendErrorResponse(w, def.ErrorInternalFaults)
+			return
+		} else {
+			sendNormalResponse(w, string(resp), 200)
+			return
+		}
+
 	}
 
-	videos := &def.VideosList{Videos: videoList}
-	if resp, err := json.Marshal(videos); err != nil {
-		sendErrorResponse(w, def.ErrorInternalFaults)
-		return
-	} else {
-		sendNormalResponse(w, string(resp), 200)
-	}
+	// videos := &def.VideosList{Videos: videoList}
+	// if resp, err := json.Marshal(videos); err != nil {
+	// 	sendErrorResponse(w, def.ErrorInternalFaults)
+	// 	return
+	// } else {
+	// 	sendNormalResponse(w, string(resp), 200)
+	// }
 	//	io.WriteString(w, "List all videos of:"+uname)
 }
 
@@ -325,8 +371,8 @@ func GetVideo(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 		return
 	}
 
-	video_info := &def.VideoInfo{Id: res.Id, Name: res.Name, DisplayCtime: res.DisplayCtime, AuthorName: res.AuthorName}
-	if resp, err := json.Marshal(video_info); err != nil {
+	// video_info := &def.VideoInfo{Id: res.Id, Name: res.Name, DisplayCtime: res.DisplayCtime, AuthorName: res.AuthorName, Modular: res.Modular, Introduction: res.Introduction, LikeNum: res.LikeNum, CollectNum: res.CollectNum, CommentNum: res.CommentNum, Icon: res.Icon, UrlOriginal: res.UrlOriginal, Url720p： res.Url720p, Url480p: res.Url480p, Url360p: res.Url360p}
+	if resp, err := json.Marshal(res); err != nil {
 		sendErrorResponse(w, def.ErrorInternalFaults)
 		return
 	} else {
@@ -356,7 +402,7 @@ func GetIntroduction(w http.ResponseWriter, r *http.Request, p httprouter.Params
 
 func DeleteVideo(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 	//验证用户
-	if !ValidateUser(w, r, p) {
+	if !ValidateUser(w, r, p) && !VailidateAdmin(w, r, p) {
 		log.Printf("Unauthorized user\n")
 		return
 	}
@@ -581,3 +627,42 @@ func SendUserMessage(w http.ResponseWriter, r *http.Request, p httprouter.Params
 func DeleteMessages(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 	return
 }
+
+func GetExamVideo(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+	//验证admin
+	if !VailidateAdmin(w, r, p) {
+		log.Printf("Unauthorized user\n")
+		return
+	}
+	fromstr := p.ByName("page")
+	fromint, err := strconv.Atoi(fromstr)
+	if err != nil {
+		log.Print("fromstr error:%v!\n", err)
+		sendErrorResponse(w, def.ErrorRequestBodyPaseFailed)
+		return
+	}
+
+	videoList, err := dbops.ListVideo(fromint, def.PAGE_NUM*2)
+	if err != nil {
+		log.Print("list video db error:%v!\n", err)
+		sendErrorResponse(w, def.ErrorDBError)
+		return
+	}
+
+	videos := &def.VideosList{Videos: videoList}
+	if resp, err := json.Marshal(videos); err != nil {
+		sendErrorResponse(w, def.ErrorInternalFaults)
+		return
+	} else {
+		sendNormalResponse(w, string(resp), 200)
+	}
+}
+
+//审核视频
+// func ExamVideo(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+// 	//验证admin
+// 	if !VailidateAdmin(w, r, p) {
+// 		log.Printf("Unauthorized user\n")
+// 		return
+// 	}
+// }

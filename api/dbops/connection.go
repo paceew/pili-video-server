@@ -17,11 +17,11 @@ var (
 func init() {
 	//mysql db init
 	fmt.Println("Entering conn.go init function...")
-	dbConn, err = sql.Open("mysql", "pace:123@/piliVideo")
+	//pace:123@/piliVideo
+	dbConn, err = sql.Open("mysql", "root:root@tcp(172.19.21.7:3306)/pilipala?charset=utf8")
 	if err != nil {
 		panic(err.Error())
 	}
-	fmt.Printf("dbConn open +%v\n", dbConn)
 
 	//redis pool init
 	Pool = redis.Pool{
