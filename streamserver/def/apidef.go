@@ -11,4 +11,6 @@ const (
 	API_ADDR        = "localhost:8000/"
 
 	SCHEDULER_ADDR = "localhost:9001/"
+
+	STREAM_LIMIT = 100 // 限制100个链接
 )

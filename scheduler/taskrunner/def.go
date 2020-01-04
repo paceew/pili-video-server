@@ -12,9 +12,9 @@ const (
 	VIDEOS_FORMAT = ".mp4"
 	ICON_PATH     = "./icon/"
 
-	INTERVAL_DEL = 360 // 删除视频时间间隔360s
+	INTERVAL_DEL = 3600 // 删除视频时间间隔3600s
 
-	INTERVAL_FM = 180 // 视频转码时间间隔180s
+	INTERVAL_FM = 1800 // 视频转码时间间隔1800s
 )
 
 type controlChan chan string

@@ -12,6 +12,7 @@ import (
 )
 
 func deleteVideo(vid string) error {
+	// log.Printf("begin to dele")
 	pathVd, _ := filepath.Abs(VIDEOS_PATH + vid)
 	pathVd2, _ := filepath.Abs(VIDEOS_PATH2 + vid)
 	pathVd3, _ := filepath.Abs(VIDEOS_PATH3 + vid)
@@ -56,10 +57,12 @@ func VideoClearDispatcher(dc dataChan) error {
 	}
 
 	if len(res) == 0 {
+		log.Printf("clear all tasks ware done!\n")
 		return errors.New("all tasks ware done!")
 	}
 
 	for _, vid := range res {
+		log.Printf("clear dispatcher tasks : %v\n", vid)
 		dc <- vid
 	}
 
@@ -103,7 +106,7 @@ forloop:
 }
 
 func formatVideo(vid string) error {
-
+	// log.Printf("begin to format video...\n")
 	err := formatVideoPart(vid, "720p")
 	if err != nil {
 		log.Printf("format error :%v\n", err)
@@ -134,10 +137,10 @@ func formatVideoPart(vid string, format string) error {
 		resolution = "1280x720"
 	case "480p":
 		outputPath, _ = filepath.Abs(VIDEOS_PATH3 + vid + VIDEOS_FORMAT)
-		resolution = "800x480"
+		resolution = "848x480"
 	case "360p":
 		outputPath, _ = filepath.Abs(VIDEOS_PATH4 + vid + VIDEOS_FORMAT)
-		resolution = "480x360"
+		resolution = "640x360"
 	}
 
 	trans := new(transcoder.Transcoder)
@@ -157,16 +160,18 @@ func formatVideoPart(vid string, format string) error {
 }
 
 func VideoFormatDispatcher(dc dataChan) error {
-	res, err := dbops.ReadUnFormat(1)
+	res, err := dbops.ReadUnFormat(5)
 	if err != nil {
 		return err
 	}
 
 	if len(res) == 0 {
+		log.Printf("format all tasks ware done!\n")
 		return errors.New("all tasks ware done!")
 	}
 
 	for _, vid := range res {
+		log.Printf("format dispatcher tasks : %v\n", vid)
 		dc <- vid
 	}
 

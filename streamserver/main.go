@@ -21,7 +21,8 @@ func (m middleWareHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	//允许访问所有域
 	w.Header().Set("Access-Control-Allow-Origin", "*")
-	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+	w.Header().Set("Access-Control-Allow-Headers", "Content-Type,x-requested-with,Authorization")
+	w.Header().Set("Access-Control-Allow-Credentials", "true")
 	m.r.ServeHTTP(w, r)
 	//releaseConnect
 	defer m.cl.ReleaseConn()
@@ -50,6 +51,6 @@ func RegisterHandler() *httprouter.Router {
 
 func main() {
 	r := RegisterHandler()
-	mh := NewMiddleWareHandler(r, 5)
+	mh := NewMiddleWareHandler(r, def.STREAM_LIMIT)
 	http.ListenAndServe(":9000", mh)
 }

@@ -257,7 +257,7 @@ func ListAllVideosByModTim(w http.ResponseWriter, r *http.Request, p httprouter.
 	fromstr := p.ByName("page")
 	fromint, err := strconv.Atoi(fromstr)
 	if err != nil {
-		log.Print("fromstr error:%v!\n", err)
+		log.Printf("fromstr error:%v!\n", err)
 		sendErrorResponse(w, def.ErrorRequestBodyPaseFailed)
 		return
 	}
@@ -265,7 +265,7 @@ func ListAllVideosByModTim(w http.ResponseWriter, r *http.Request, p httprouter.
 	mod := p.ByName("modular")
 	videoList, err := dbops.ListVideoInfoMod(mod, fromint, def.PAGE_NUM, "time")
 	if err != nil {
-		log.Print("list video db error!\n")
+		log.Printf("list video db error:%v!\n", err)
 		sendErrorResponse(w, def.ErrorDBError)
 		return
 	}

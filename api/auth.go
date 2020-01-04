@@ -16,7 +16,7 @@ var HEADER_FIELD_USERNAME = "X-User-Name"
 //验证session如果存在则重设session并且设置requset header X-User-Name
 func validateUserSession(r *http.Request) bool {
 	// log.Printf("validating User Session ...\n")
-	sid := r.Header.Get("Authorization")
+	sid := r.Header.Get(HEADER_FIELD_SESSION)
 	if len(sid) == 0 {
 		r.Header.Add(HEADER_FIELD_USERNAME, "")
 		return false

@@ -1,7 +1,7 @@
 package def
 
 const (
-	INTERVAL = 360 //每360s执行一次
+	INTERVAL = 3600 //每3600s执行一次
 )
 
 //避免循环引用，用于timertask
