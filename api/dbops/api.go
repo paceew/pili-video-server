@@ -65,7 +65,7 @@ func GetUser(userName string) (*def.User, error) {
 }
 
 func GetUserId(userName string) (string, error) {
-	stmtOut, err := dbConn.Prepare("SELECT id FROM users WHERE username = ?")
+	stmtOut, err := dbConn.Prepare("SELECT username FROM users WHERE username = ?")
 	if err != nil {
 		log.Printf("get user id db prepare error!\n")
 		return "", err
@@ -105,7 +105,7 @@ func AddNewVideo(aid string, vname string, mid int, itd string) (string, error) 
 	vid, _ := utils.NewUUID()
 
 	t := time.Now()
-	ctime := t.Format("Jan 02 2006, 15:04:05")
+	ctime := t.Format("2006-01-02, 15:04:05")
 
 	stmtIns, err := dbConn.Prepare(`INSERT INTO video_info_copy
 	(id, author_id, name, modular, create_time) VALUES(?, ?, ?, ?, ?)`)

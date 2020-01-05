@@ -19,10 +19,11 @@ func (m middleWareHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	//允许访问所有域
-	w.Header().Set("Access-Control-Allow-Origin", "*")
-	w.Header().Set("Access-Control-Allow-Headers", "Content-Type,x-requested-with,Authorization")
+	//允许访问域
+	w.Header().Set("Access-Control-Allow-Origin", "http://172.19.21.3:3000")
+	w.Header().Set("Access-Control-Allow-Headers", "Authorization, Content-Type,Depth, User-Agent, X-Session-Id, X-User-Name, If-Modified-Since, Cache-Control, Origin")
 	w.Header().Set("Access-Control-Allow-Credentials", "true")
+	w.Header().Set("access-control-allow-methods", "GET, POST, OPTIONS, PUT, DELETE")
 	m.r.ServeHTTP(w, r)
 	//releaseConnect
 	defer m.cl.ReleaseConn()

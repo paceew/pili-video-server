@@ -27,6 +27,7 @@ func (w *Worker) startWorker() {
 }
 
 func Start() {
+	//tr 删除视频
 	rDel := NewRunner(5, true, VideoClearDispatcher, VideoClearExecutor)
 	wDel := NewWorker(INTERVAL_DEL, rDel)
 	go wDel.startWorker()
